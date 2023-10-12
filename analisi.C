@@ -19,6 +19,7 @@ double getE(double * v){
 
 void analisi::Loop()
 {
+   cout << "print some text";
    //   In a ROOT session, you can do:
    //      root> .L analisi.C
    //      root> analisi t
@@ -27,6 +28,7 @@ void analisi::Loop()
    //      root> t.Show(16);     // Read and show values of entry 16
    //      root> t.Loop();       // Loop on all entries
    //
+   
 
    //     This is the loop skeleton where:
    //    jentry is the global entry number in the chain
