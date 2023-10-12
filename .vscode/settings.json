@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "analisi.C": "cpp"
+    },
+    "cmake.configureOnOpen": true
+}

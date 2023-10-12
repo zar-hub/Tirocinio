@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"analisi.C": "cpp",
+			"Launch.C": "cpp",
+			"fit.C": "cpp",
+			"gauss.C": "cpp",
+			"plot.C": "cpp",
+			"iostream": "cpp"
+		},
+		"C_Cpp.default.includePath": [
+			"/opt/root/include"
+		]
+	}
+}
