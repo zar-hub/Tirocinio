@@ -1,26 +1,4 @@
-#define analisi_cxx
-#include "analisi.h"
-#include <TH1F.h>
-#include <TH2.h>
-#include <TStyle.h>
-#include <TCanvas.h>
-#include <math.h>
-#include <iostream>
-#include <TLorentzVector.h>
-
-using namespace std;
-
-double getE(double * v){
-   double res = 0;
-   for (int i = 0; i < 4; i++)
-      res += v[i] * v[i];
-   return sqrt(res);
-}
-
-void analisi::Loop()
-{
-   cout << "print some text";
-   //   In a ROOT session, you can do:
+//   In a ROOT session, you can do:
    //      root> .L analisi.C
    //      root> analisi t
    //      root> t.GetEntry(12); // Fill t data members with entry number 12
@@ -44,23 +22,101 @@ void analisi::Loop()
    // METHOD2: replace line
    //    fChain->GetEntry(jentry);       //read all branches
    // by  b_branchname->GetEntry(ientry); //read only this branch
+
+
+#define analisi_cxx
+#include "analisi.h"
+#include <TH1F.h>
+#include <TH2.h>
+#include <TStyle.h>
+#include <TCanvas.h>
+#include <math.h>
+#include <iostream>
+#include <TLorentzVector.h>
+
+using namespace std;
+
+#define ETRN_MASS 0.511e-3 // mass of the electron [Gev/C^2]
+
+// high level trigger parameters
+struct HLTP_Isolation
+{
+   Float_t combinedISO;
+   Float_t trackerRelISO;
+   Float_t ECALRelISO;
+   Float_t HCALRelISO;
+};
+
+struct HLTP_ETRN_ID
+{
+   Float_t dEta;
+   Float_t dPhi;
+   Float_t HoE;
+   Float_t sig;
+};
+
+struct HLTP_ConversionRejection{
+   Float_t missHits;
+   Float_t dist;
+   Float_t dCot;
+};
+
+struct HLTP{
+   HLTP_ConversionRejection convRej;
+   HLTP_Isolation isolation;
+   HLTP_ETRN_ID etrnID;
+};
+
+struct WPXX{
+   HLTP barrel;
+   HLTP endcaps;
+};
+
+const WPXX WP80 = {
+    // BARREL
+    {
+        // conversion rejection
+        // missHits, dist, deltaCot
+        {0, .02, .02},
+
+        // isolation
+        // COMB, TRK, ECAL, HCAL
+        {.07, .09, .07, .1},
+
+        // electron ID
+        // dEta, dPhi, HoE, sig
+        {.004, .06, .04, .01}},
+    // ENDCAPS
+    {
+        // conversion rejection
+        // missHits, dist, deltaCot
+        {0, .02, .02},
+
+        // isolation
+        // COMB, TRK, ECAL, HCAL
+        {.06, .04, .05, .025},
+
+        // electron ID
+        // dEta, dPhi, HoE, sig
+        {.007, .03, .025, .03}}};
+
+void analisi::Loop()
+{   
    if (fChain == 0)
       return;
 
-   double em = 0.511e-3; // mass of the electron [Gev/C^2]
+   // graphs pipeline
+   auto canvas = new TCanvas("myCanvas", "Z boson experiment", 800, 600);
+   canvas->Divide(2,2);
+   auto hMass = new TH1F("hMass", "hMass", 100, 60, 120);
+   hMass->SetLineColor(kRed);
 
-   auto he_1 = new TH1F("h1", "h1", 100, 0, 120);
-   auto he_2 = new TH1F("h2", "h2", 100, 0, 120);
-   
-   he_1->SetLineColor(kRed);
-   he_2->SetLineColor(kGreen);
-   TH1F* he[3] = {he_1, he_2};
+   // particle variables
+   TLorentzVector etrn[2];
+   TLorentzVector parent;
 
-   double theta, E;
-   double p[4], both[4];
-
+   // main loop
    Long64_t nentries = fChain->GetEntriesFast();
-
    Long64_t nbytes = 0, nb = 0;
    for (Long64_t jentry = 0; jentry < nentries; jentry++)
    {
@@ -71,30 +127,14 @@ void analisi::Loop()
       nbytes += nb;
       // if (Cut(ientry) < 0) continue;
 
-      // Compute the energy
-      for(int i = 0; i < 4; i++){
-         both[i] = 0;
-         p[i] = 0;
+      // load particles for the specific event
+      for (int i : {0, 1}){
+         etrn[i].SetPtEtaPhiM(pt[i],eta[i],phi[i],ETRN_MASS);
       }
-
-      // Compute the momentum
-      for (int i = 0; i < 2; i++)
-      {
-         theta = 2 * atan(exp(-eta[i]));
-         p[0] = em;
-         p[1] = pt[i] * sin(phi[i]);
-         p[2] = pt[i] * cos(phi[i]);
-         p[3] = pt[i] * tan(theta);
-
-         for (int i = 0; i < 4; i++)
-            both[i] = both[i] + p[i];
-
-         // Get the energy
-         E = getE(p);
-         he[i]->Fill(E);
-      }
+         
+      // compute the sum 
+      parent = etrn[0] + etrn[1];
+      hMass->Fill(parent.M());
    }
-   he_1->Draw();
-   he_2->Draw("SAME");
-   cout << "hi";
+   hMass->Draw();
 }
