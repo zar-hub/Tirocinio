@@ -12,11 +12,13 @@ This project includes several key components:
 
 ## TODO
 
-- [ ] Improve fit functions.
+- [x] Improve fit functions.
 - [ ] Improve the plotting code.
 - [ ] Write tests for the analysis code.
 - [ ] Document the code.
 - [ ] fitEndcapsFailed does not converge
+- [ ] remove noise from the failed graph
+- [ ] find efficiency
 
 ## Notes
 - I chanded fitBarrel/EndcapsPassed to a double sided exp because using the two sided gaussian with a peak it would not converge.

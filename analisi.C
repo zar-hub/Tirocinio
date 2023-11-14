@@ -19,7 +19,14 @@ se i due elettroni sono uno di barrel e uno di endcaps dove devo mettere i faile
 
 using namespace std;
 
+// DBG
 const bool DBG_GOODWP80 = true;
+
+// Tweaking
+#define grMinX 55
+#define grMaxX 125
+#define fitMinX 60
+#define fitMaxX 120
 
 /**
  * @brief Prints a debug message if the condition is false,
@@ -114,34 +121,60 @@ void analisi::Loop()
    Long64_t discarded = 0;
 
    // fit functions
-   auto fitBarrelPassed = new TF1("fitBarrelPassed", biExpFit, 60, 120, 4);
+   auto fitBarrelPassed = new TF1("fitBarrelPassed", biExpFit, fitMinX, fitMaxX, 4);
    fitBarrelPassed->SetParNames("x0", "A", "kL", "kR");
-   fitBarrelPassed->SetParameters(90,1000,1,1);
-   
+   fitBarrelPassed->SetParameters(90, 1000, 1, 1);
 
-   auto fitEndcapsPassed = new TF1("fitEndcapsPassed", biExpFit, 60, 120, 4);
+   auto fitEndcapsPassed = new TF1("fitEndcapsPassed", biExpFit, fitMinX, fitMaxX, 4);
    fitEndcapsPassed->SetParNames("x0", "A", "kL", "kR");
-   fitEndcapsPassed->SetParameters(90,1000,1,1);
-  
-   auto fitBarrelFailed = new TF1("fitBarrelFailed", expBigausV0, 60, 120, 7);
+   fitEndcapsPassed->SetParameters(90, 1000, 1, 1);
+
+   auto fitBarrelFailed = new TF1("fitBarrelFailed", expBigausV0, fitMinX, fitMaxX, 7);
    fitBarrelFailed->SetParNames("x0 exp", "A exp", "k exp", "mu bigaus", "amplitude", "sigma left", "sigma right");
    fitBarrelFailed->SetParameters(36, 305, 0.02, 90, 590, 5, 4);
 
-   auto fitEndcapsFailed = new TF1("fitEndcapsFailed", expBigausV0, 60, 120, 7);
+   auto fitEndcapsFailed = new TF1("fitEndcapsFailed", expBigausV0, fitMinX, fitMaxX, 7);
    fitEndcapsFailed->SetParNames("x0 exp", "A exp", "k exp", "mu bigaus", "amplitude", "sigma left", "sigma right");
    fitEndcapsFailed->SetParameters(36, 305, 0.02, 90, 590, 5, 4);
 
    // canvas & graphs
-   auto canvas = new TCanvas("mycanvas", "mycanvas", 0,0, 1920,1080);
-   auto grBarrelPassed = new TH1D("WP80BRLPSS", "WP80 barrel passed", 60, 50, 120);
-   auto grBarrelFailed = new TH1D("WP80BRLFLD", "WP80 barrel failed", 60, 50, 120);
-   auto grEndcapsPassed = new TH1D("WP80ENDCPSS", "WP80 endcaps passed", 60, 50, 120);
-   auto grEndcapsFailed = new TH1D("WP80ENDCFLD", "WP80 endcaps failed", 60, 50, 120);
+   auto canvas = new TCanvas("mycanvas", "mycanvas", 0, 0, 1600, 1000);
+   auto grBarrelPassed = new TH1D("WP80BRLPSS", "WP80 barrel passed", 60, grMinX, grMaxX);
+   auto grBarrelFailed = new TH1D("WP80BRLFLD", "WP80 barrel failed", 60, grMinX, grMaxX);
+   auto grEndcapsPassed = new TH1D("WP80ENDCPSS", "WP80 endcaps passed", 60, grMinX, grMaxX);
+   auto grEndcapsFailed = new TH1D("WP80ENDCFLD", "WP80 endcaps failed", 60, grMinX, grMaxX);
    canvas->Divide(2, 2);
 
    // style
    gStyle->SetOptStat(000000011);
    gStyle->SetOptFit(0001);
+
+   grBarrelPassed->GetXaxis()->SetTitle("mee");
+   grBarrelPassed->GetYaxis()->SetTitle("events");
+
+   grBarrelFailed->GetXaxis()->SetTitle("mee");
+   grBarrelFailed->GetYaxis()->SetTitle("events");
+
+   grEndcapsPassed->GetXaxis()->SetTitle("mee");
+   grEndcapsPassed->GetYaxis()->SetTitle("events");
+
+   grEndcapsFailed->GetXaxis()->SetTitle("mee");
+   grEndcapsFailed->GetYaxis()->SetTitle("events");
+
+   // Set line colors
+   grBarrelPassed->SetLineColor(kGreen);
+   grBarrelFailed->SetLineColor(kRed);
+   grEndcapsPassed->SetLineColor(kGreen);
+   grEndcapsFailed->SetLineColor(kRed);
+   grBarrelPassed->SetFillColor(407);
+   grEndcapsPassed->SetFillColor(407);
+   grBarrelFailed->SetFillColor(40);
+   grEndcapsFailed->SetFillColor(40);
+
+   fitBarrelPassed->SetLineColor(kGreen);
+   fitEndcapsPassed->SetLineColor(kGreen);
+   fitBarrelFailed->SetLineColor(kRed);
+   fitEndcapsFailed->SetLineColor(kRed);
 
    for (Long64_t jentry = 0; jentry < nentries; jentry++)
    {
@@ -192,4 +225,15 @@ void analisi::Loop()
    canvas->cd(4);
    grEndcapsFailed->Draw();
    grEndcapsFailed->Fit(fitEndcapsFailed);
+
+   // Efficiency considerations
+   cout << "-----------" << endl;
+   Double_t areaBarrelPassed = fitBarrelPassed->Integral(60, 120);
+   Double_t areaBarrelFailed = fitBarrelFailed->Integral(60, 120);
+   Double_t areaEndcapsPassed = fitEndcapsPassed->Integral(60, 120);
+   Double_t areaEndcapsFailed = fitEndcapsFailed->Integral(60, 120);
+   cout << "Area under the curve for fitBarrelPassed: " << areaBarrelPassed << endl;
+   cout << "Noisy area under the curve for fitBarrelFailed: " << areaBarrelFailed << endl;
+   cout << "Area under the curve for fitEndcapsPassed: " << areaEndcapsPassed << endl;
+   cout << "Noisy area under the curve for fitEndcapsFailed: " << areaEndcapsFailed << endl;
 }
