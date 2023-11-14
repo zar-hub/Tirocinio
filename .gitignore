@@ -1,0 +1,51 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# The .vscode folder contains user-specific settings - ignore it
+.vscode/
+
+# The .idea folder contains user-specific settings - ignore it
+.idea/
+
+# Ignore .log files
+*.log
+
+# Ignore temporary files
+tmp/
+*.cxx_tmp*
+
+# Ignore PDF files
+*.pdf

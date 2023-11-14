@@ -100,7 +100,6 @@ Bool_t analisi::GoodWP80(int i)
    return kTRUE;
 }
 
-
 void analisi::Loop()
 {
    // health check
@@ -117,26 +116,33 @@ void analisi::Loop()
    // fit functions
    auto fitBarrelPassed = new TF1("fitBarrelPassed", peakBigausV1, 60, 120, 7);
    fitBarrelPassed->SetParNames("mu peak", "A peak", "sigma peak", "mu bigaus", "amplitude", "sigma left", "sigma right");
-   fitBarrelPassed->SetParameters(90, 326, 3, 90, 590, 5, 4);
+   fitBarrelPassed->SetParameters(90, 110, 2, 90, 590, 5, 4);
    fitBarrelPassed->SetParLimits(1, 0, 600); // Set limits for "A peak"
-   fitBarrelPassed->SetParLimits(2, 0, 2);   // Set limits for "sigma peak"
+   fitBarrelPassed->SetParLimits(2, 0, 4);   // Set limits for "sigma peak"
+   //fitBarrelPassed->FixParameter(0, 90);
+   //fitBarrelPassed->FixParameter(1, 0);
+   //fitBarrelPassed->FixParameter(2, 1);
+   //fitBarrelPassed->FixParameter(3, 91);
+   //fitBarrelPassed->FixParameter(4, 918);
+   //fitBarrelPassed->FixParameter(5, 4.5);
+   //fitBarrelPassed->FixParameter(6, 2.7);
 
    auto fitEndcapsPassed = new TF1("fitEndcapsPassed", peakBigausV1, 60, 120, 7);
    fitEndcapsPassed->SetParNames("mu peak", "A peak", "sigma peak", "mu bigaus", "amplitude", "sigma left", "sigma right");
-   fitEndcapsPassed->SetParameters(90, 326, 3, 90, 590, 5, 4);
+   fitEndcapsPassed->SetParameters(90, 326, 3, 91, 918, 4.5, 2.7);
    fitEndcapsPassed->SetParLimits(1, 0, 600); // Set limits for "A peak"
    fitEndcapsPassed->SetParLimits(2, 0, 6);   // Set limits for "sigma peak"`
-
+  
    auto fitBarrelFailed = new TF1("fitBarrelFailed", expBigausV0, 60, 120, 7);
    fitBarrelFailed->SetParNames("x0 exp", "A exp", "k exp", "mu bigaus", "amplitude", "sigma left", "sigma right");
    fitBarrelFailed->SetParameters(36, 305, 0.02, 90, 590, 5, 4);
-   
+
    auto fitEndcapsFailed = new TF1("fitEndcapsFailed", expBigausV0, 60, 120, 7);
    fitEndcapsFailed->SetParNames("x0 exp", "A exp", "k exp", "mu bigaus", "amplitude", "sigma left", "sigma right");
    fitEndcapsFailed->SetParameters(36, 305, 0.02, 90, 590, 5, 4);
-   
+
    // canvas & graphs
-   auto canvas = new TCanvas;
+   auto canvas = new TCanvas("mycanvas", "mycanvas", 0,0, 1920,1080);
    auto grBarrelPassed = new TH1D("WP80BRLPSS", "WP80 barrel passed", 60, 50, 120);
    auto grBarrelFailed = new TH1D("WP80BRLFLD", "WP80 barrel failed", 60, 50, 120);
    auto grEndcapsPassed = new TH1D("WP80ENDCPSS", "WP80 endcaps passed", 60, 50, 120);
@@ -180,21 +186,21 @@ void analisi::Loop()
       }
    }
    cout << discarded << " discarded out of " << nentries << endl;
-
    // draw stuff
-   canvas->GetPad(1)->cd();
+   canvas->cd(1);
    grBarrelPassed->Draw();
-   grBarrelPassed->Fit(fitBarrelPassed);
+   grBarrelPassed->Fit(fitBarrelPassed, "WQRN");
+   grBarrelPassed->Fit(fitBarrelPassed, "RM+");
 
-   canvas->GetPad(2)->cd();
+   canvas->cd(2);
    grBarrelFailed->Draw();
    grBarrelFailed->Fit(fitBarrelFailed);
 
-   canvas->GetPad(3)->cd();
+   canvas->cd(3);
    grEndcapsPassed->Draw();
    grEndcapsPassed->Fit(fitEndcapsPassed);
 
-   canvas->GetPad(4)->cd();
+   canvas->cd(4);
    grEndcapsFailed->Draw();
    grEndcapsFailed->Fit(fitEndcapsFailed);
 }
