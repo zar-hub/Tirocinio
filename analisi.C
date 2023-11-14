@@ -236,4 +236,7 @@ void analisi::Loop()
    cout << "Noisy area under the curve for fitBarrelFailed: " << areaBarrelFailed << endl;
    cout << "Area under the curve for fitEndcapsPassed: " << areaEndcapsPassed << endl;
    cout << "Noisy area under the curve for fitEndcapsFailed: " << areaEndcapsFailed << endl;
+
+   // save canvas
+   canvas->SaveAs("canvas.png");
 }

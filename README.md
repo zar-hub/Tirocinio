@@ -3,7 +3,7 @@
 This is a C++ project that uses the ROOT framework for data analysis in particle physics. The project includes various fit functions and analysis methods to study properties of particles.
 
 ## Description
-
+![graph](canvas.png)
 This project includes several key components:
 
 - Fit functions: These are defined in `fitFunctions.h` and include various fit functions used in the analysis.
