@@ -9,161 +9,97 @@ se i due elettroni sono uno di barrel e uno di endcaps dove devo mettere i faile
 #include "analisi.h"
 #include <TH1F.h>
 #include <TH2.h>
+#include <TF1.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <math.h>
 #include <iostream>
 #include <TLorentzVector.h>
+#include "fitFunctions.h"
 
 using namespace std;
 
 const bool DBG_GOODWP80 = true;
 
+/**
+ * @brief Prints a debug message if the condition is false,
+ *        it is a wrapper, does not change the flow of the program.
+ *
+ * @param message The message to print.
+ * @param condition The condition to check.
+ * @return The value of the condition.
+ */
+bool debugMessage(const std::string &message, bool condition)
+{
+   if (DBG_GOODWP80 && !condition)
+   {
+      cout << message << endl;
+   }
+   return condition;
+}
+
 Bool_t analisi::GoodWP80(int i)
 {
-   // Checks if current entry is a good entry according to WP80 standard
-
-   if (DBG_GOODWP80)
-      cout << "particle " << i << " : ";
-
-   // common
-   if (missHits[i] > 0)
-   {
-      if (DBG_GOODWP80)
-         cout << "missHits failed..." << endl;
+   if (!debugMessage("particle " + std::to_string(i), true))
       return kFALSE;
-   }
-   else if (abs(dist[i]) < 0.02 && abs(dcot[i]) < 0.02)
-   {
-      if (DBG_GOODWP80)
-      {
-         cout << (abs(dist[i]) < 0.2) << endl;
-         cout << (abs(dcot[i]) < 0.2) << endl;
-         cout << setprecision(2) << dist[i] << ' ' << dcot[i];
-         cout << "dist or dcot failed..." << endl;
-      }
+   if (!debugMessage("missHits failed...", missHits[i] <= 0))
       return kFALSE;
-   }
-   // Barrel
-   else if (abs(eta[i]) <= 1.44)
+   if (!debugMessage("dist or dcot failed...", abs(dist[i]) >= 0.02 || abs(dcot[i]) >= 0.02))
+      return kFALSE;
+   if (abs(eta[i]) <= 1.44)
    {
-      if (DBG_GOODWP80)
-         cout << "barrel, ";
-      if (abs(combinedIso[i] / pt[i]) >= 0.07)
-      {
-         if (DBG_GOODWP80)
-            cout << "combined ISO failed..." << endl;
+      if (!debugMessage("barrel", true))
          return kFALSE;
-      }
-      if (abs(trackerIso[i] / pt[i]) >= 0.09)
-      {
-         if (DBG_GOODWP80)
-            cout << "tracker ISO failed..." << endl;
+      if (!debugMessage("combined ISO failed...", abs(combinedIso[i] / pt[i]) < 0.07))
          return kFALSE;
-      }
-      if (abs(ecalJIso[i] / pt[i]) >= 0.07)
-      {
-         if (DBG_GOODWP80)
-            cout << "ecal ISO..." << endl;
+      if (!debugMessage("tracker ISO failed...", abs(trackerIso[i] / pt[i]) < 0.09))
          return kFALSE;
-      }
-      if (abs(hcalIso[i] / pt[i]) >= 0.10)
-      {
-         if (DBG_GOODWP80)
-            cout << "hcal ISO failed..." << endl;
+      if (!debugMessage("ecal ISO failed...", abs(ecalJIso[i] / pt[i]) < 0.07))
          return kFALSE;
-      }
-      if (abs(deta[i]) >= 0.004)
-      {
-         if (DBG_GOODWP80)
-            cout << "deta failed..." << endl;
+      if (!debugMessage("hcal ISO failed...", abs(hcalIso[i] / pt[i]) < 0.10))
          return kFALSE;
-      }
-      if (abs(dphi[i]) >= 0.06)
-      {
-         if (DBG_GOODWP80)
-            cout << "dphi failed..." << endl;
+      if (!debugMessage("deta failed...", abs(deta[i]) < 0.004))
          return kFALSE;
-      }
-      if (abs(hoe[i]) >= 0.04)
-      {
-         if (DBG_GOODWP80)
-            cout << "hoe failed..." << endl;
+      if (!debugMessage("dphi failed...", abs(dphi[i]) < 0.06))
          return kFALSE;
-      }
-      if (abs(see[i]) >= 0.01)
-      {
-         if (DBG_GOODWP80)
-            cout << "see failed..." << endl;
+      if (!debugMessage("hoe failed...", abs(hoe[i]) < 0.04))
          return kFALSE;
-      }
-      if (DBG_GOODWP80)
-         cout << "GOOD! " << endl;
+      if (!debugMessage("see failed...", abs(see[i]) < 0.01))
+         return kFALSE;
+      if (!debugMessage("GOOD!", true))
+         return kFALSE;
    }
-   // Endcaps
    else if (abs(eta[i]) >= 1.56)
    {
-      if (DBG_GOODWP80)
-         cout << "endcaps, ";
-      if (abs(combinedIso[i] / pt[i]) >= 0.06)
-      {
-         if (DBG_GOODWP80)
-            cout << "combined ISO failed..." << endl;
+      if (!debugMessage("endcaps", true))
          return kFALSE;
-      }
-      if (abs(trackerIso[i] / pt[i]) >= 0.04)
-      {
-         if (DBG_GOODWP80)
-            cout << "tracker ISO failed..." << endl;
+      if (!debugMessage("combined ISO failed...", abs(combinedIso[i] / pt[i]) < 0.06))
          return kFALSE;
-      }
-      if (abs(ecalJIso[i] / pt[i]) >= 0.05)
-      {
-         if (DBG_GOODWP80)
-            cout << "ecalJISO failed..." << endl;
+      if (!debugMessage("tracker ISO failed...", abs(trackerIso[i] / pt[i]) < 0.04))
          return kFALSE;
-      }
-      if (abs(hcalIso[i] / pt[i]) >= 0.025)
-      {
-         if (DBG_GOODWP80)
-            cout << "hcal ISO failed..." << endl;
+      if (!debugMessage("ecalJISO failed...", abs(ecalJIso[i] / pt[i]) < 0.05))
          return kFALSE;
-      }
-      if (abs(deta[i]) >= 0.007)
-      {
-         if (DBG_GOODWP80)
-            cout << "deta failed..." << endl;
+      if (!debugMessage("hcal ISO failed...", abs(hcalIso[i] / pt[i]) < 0.025))
          return kFALSE;
-      }
-      if (abs(dphi[i]) >= 0.03)
-      {
-         if (DBG_GOODWP80)
-            cout << "dphi failed..." << endl;
+      if (!debugMessage("deta failed...", abs(deta[i]) < 0.007))
          return kFALSE;
-      }
-      if (abs(hoe[i]) >= 0.025)
-      {
-         if (DBG_GOODWP80)
-            cout << "hoe failed..." << endl;
+      if (!debugMessage("dphi failed...", abs(dphi[i]) < 0.03))
          return kFALSE;
-      }
-      if (abs(see[i]) >= 0.03)
-      {
-         if (DBG_GOODWP80)
-            cout << "see failed..." << endl;
+      if (!debugMessage("hoe failed...", abs(hoe[i]) < 0.025))
          return kFALSE;
-      }
-      if (DBG_GOODWP80)
-         cout << "GOOD! " << endl;
+      if (!debugMessage("see failed...", abs(see[i]) < 0.03))
+         return kFALSE;
+      if (!debugMessage("GOOD!", true))
+         return kFALSE;
    }
    else
    {
-      if (DBG_GOODWP80)
-         cout << "outside range..." << endl;
-      return kFALSE;
+      if (!debugMessage("outside range...", false))
+         return kFALSE;
    }
    return kTRUE;
 }
+
 
 void analisi::Loop()
 {
@@ -174,9 +110,31 @@ void analisi::Loop()
    // variable definitions
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
-   const double ELMASS = 5.11e-3; // GeV
-   TLorentzVector particle[2], parent;
 
+   // some info
+   Long64_t discarded = 0;
+
+   // fit functions
+   auto fitBarrelPassed = new TF1("fitBarrelPassed", peakBigausV1, 60, 120, 7);
+   fitBarrelPassed->SetParNames("mu peak", "A peak", "sigma peak", "mu bigaus", "amplitude", "sigma left", "sigma right");
+   fitBarrelPassed->SetParameters(90, 326, 3, 90, 590, 5, 4);
+   fitBarrelPassed->SetParLimits(1, 0, 600); // Set limits for "A peak"
+   fitBarrelPassed->SetParLimits(2, 0, 2);   // Set limits for "sigma peak"
+
+   auto fitEndcapsPassed = new TF1("fitEndcapsPassed", peakBigausV1, 60, 120, 7);
+   fitEndcapsPassed->SetParNames("mu peak", "A peak", "sigma peak", "mu bigaus", "amplitude", "sigma left", "sigma right");
+   fitEndcapsPassed->SetParameters(90, 326, 3, 90, 590, 5, 4);
+   fitEndcapsPassed->SetParLimits(1, 0, 600); // Set limits for "A peak"
+   fitEndcapsPassed->SetParLimits(2, 0, 6);   // Set limits for "sigma peak"`
+
+   auto fitBarrelFailed = new TF1("fitBarrelFailed", expBigausV0, 60, 120, 7);
+   fitBarrelFailed->SetParNames("x0 exp", "A exp", "k exp", "mu bigaus", "amplitude", "sigma left", "sigma right");
+   fitBarrelFailed->SetParameters(36, 305, 0.02, 90, 590, 5, 4);
+   
+   auto fitEndcapsFailed = new TF1("fitEndcapsFailed", expBigausV0, 60, 120, 7);
+   fitEndcapsFailed->SetParNames("x0 exp", "A exp", "k exp", "mu bigaus", "amplitude", "sigma left", "sigma right");
+   fitEndcapsFailed->SetParameters(36, 305, 0.02, 90, 590, 5, 4);
+   
    // canvas & graphs
    auto canvas = new TCanvas;
    auto grBarrelPassed = new TH1D("WP80BRLPSS", "WP80 barrel passed", 60, 50, 120);
@@ -184,6 +142,10 @@ void analisi::Loop()
    auto grEndcapsPassed = new TH1D("WP80ENDCPSS", "WP80 endcaps passed", 60, 50, 120);
    auto grEndcapsFailed = new TH1D("WP80ENDCFLD", "WP80 endcaps failed", 60, 50, 120);
    canvas->Divide(2, 2);
+
+   // style
+   gStyle->SetOptStat(000000011);
+   gStyle->SetOptFit(0001);
 
    for (Long64_t jentry = 0; jentry < nentries; jentry++)
    {
@@ -195,39 +157,44 @@ void analisi::Loop()
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
 
-      // load particles
-      for (int i : {0, 1})
+      // check the first, continue if failed
+      if (!GoodWP80(0))
       {
-         particle[i].SetPtEtaPhiM(pt[i], eta[i], phi[i], ELMASS);
+         discarded++;
+         continue;
       }
-      // parent=particle[0]+particle[1];
-
-      for (int i : {0, 1})
+      // do statistic with the second
+      if (GoodWP80(1))
       {
-         if (GoodWP80(i))
-         {
-            if (particle[1].Eta() <= 1.44)
-               grBarrelPassed->Fill(mee);
-            if (particle[1].Eta() >= 1.566)
-               grEndcapsPassed->Fill(mee);
-         }
-         else 
-         {
-            if (particle[1].Eta() <= 1.44)
-               grBarrelFailed->Fill(mee);
-            if (particle[1].Eta() >= 1.566)
-               grEndcapsFailed->Fill(mee);
-         }
+         if (eta[1] <= 1.44)
+            grBarrelPassed->Fill(mee);
+         if (eta[1] >= 1.566)
+            grEndcapsPassed->Fill(mee);
+      }
+      else
+      {
+         if (eta[1] <= 1.44)
+            grBarrelFailed->Fill(mee);
+         if (eta[1] >= 1.566)
+            grEndcapsFailed->Fill(mee);
       }
    }
+   cout << discarded << " discarded out of " << nentries << endl;
 
    // draw stuff
    canvas->GetPad(1)->cd();
    grBarrelPassed->Draw();
+   grBarrelPassed->Fit(fitBarrelPassed);
+
    canvas->GetPad(2)->cd();
    grBarrelFailed->Draw();
+   grBarrelFailed->Fit(fitBarrelFailed);
+
    canvas->GetPad(3)->cd();
    grEndcapsPassed->Draw();
+   grEndcapsPassed->Fit(fitEndcapsPassed);
+
    canvas->GetPad(4)->cd();
    grEndcapsFailed->Draw();
+   grEndcapsFailed->Fit(fitEndcapsFailed);
 }
