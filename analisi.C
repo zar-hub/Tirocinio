@@ -114,24 +114,14 @@ void analisi::Loop()
    Long64_t discarded = 0;
 
    // fit functions
-   auto fitBarrelPassed = new TF1("fitBarrelPassed", peakBigausV1, 60, 120, 7);
-   fitBarrelPassed->SetParNames("mu peak", "A peak", "sigma peak", "mu bigaus", "amplitude", "sigma left", "sigma right");
-   fitBarrelPassed->SetParameters(90, 110, 2, 90, 590, 5, 4);
-   fitBarrelPassed->SetParLimits(1, 0, 600); // Set limits for "A peak"
-   fitBarrelPassed->SetParLimits(2, 0, 4);   // Set limits for "sigma peak"
-   //fitBarrelPassed->FixParameter(0, 90);
-   //fitBarrelPassed->FixParameter(1, 0);
-   //fitBarrelPassed->FixParameter(2, 1);
-   //fitBarrelPassed->FixParameter(3, 91);
-   //fitBarrelPassed->FixParameter(4, 918);
-   //fitBarrelPassed->FixParameter(5, 4.5);
-   //fitBarrelPassed->FixParameter(6, 2.7);
+   auto fitBarrelPassed = new TF1("fitBarrelPassed", biExpFit, 60, 120, 4);
+   fitBarrelPassed->SetParNames("x0", "A", "kL", "kR");
+   fitBarrelPassed->SetParameters(90,1000,1,1);
+   
 
-   auto fitEndcapsPassed = new TF1("fitEndcapsPassed", peakBigausV1, 60, 120, 7);
-   fitEndcapsPassed->SetParNames("mu peak", "A peak", "sigma peak", "mu bigaus", "amplitude", "sigma left", "sigma right");
-   fitEndcapsPassed->SetParameters(90, 326, 3, 91, 918, 4.5, 2.7);
-   fitEndcapsPassed->SetParLimits(1, 0, 600); // Set limits for "A peak"
-   fitEndcapsPassed->SetParLimits(2, 0, 6);   // Set limits for "sigma peak"`
+   auto fitEndcapsPassed = new TF1("fitEndcapsPassed", biExpFit, 60, 120, 4);
+   fitEndcapsPassed->SetParNames("x0", "A", "kL", "kR");
+   fitEndcapsPassed->SetParameters(90,1000,1,1);
   
    auto fitBarrelFailed = new TF1("fitBarrelFailed", expBigausV0, 60, 120, 7);
    fitBarrelFailed->SetParNames("x0 exp", "A exp", "k exp", "mu bigaus", "amplitude", "sigma left", "sigma right");
@@ -189,8 +179,7 @@ void analisi::Loop()
    // draw stuff
    canvas->cd(1);
    grBarrelPassed->Draw();
-   grBarrelPassed->Fit(fitBarrelPassed, "WQRN");
-   grBarrelPassed->Fit(fitBarrelPassed, "RM+");
+   grBarrelPassed->Fit(fitBarrelPassed);
 
    canvas->cd(2);
    grBarrelFailed->Draw();
