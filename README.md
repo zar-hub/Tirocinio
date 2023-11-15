@@ -19,6 +19,8 @@ This project includes several key components:
 - [ ] fitEndcapsFailed does not converge
 - [ ] remove noise from the failed graph
 - [ ] find efficiency
+- [ ] the area of the fit function is greater than the total number of events... which seems sus.
+- [ ] there are too many events (maybe?) 
 
 ## Notes
 - I chanded fitBarrel/EndcapsPassed to a double sided exp because using the two sided gaussian with a peak it would not converge.

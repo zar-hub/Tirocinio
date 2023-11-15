@@ -2,6 +2,7 @@
 #define FITFUNCTIONS_H
 
 #include <TROOT.h>
+#include <TF1.h>
 
 Double_t bigaus(Double_t *_x, Double_t *_par)
 {
@@ -65,6 +66,23 @@ Double_t peakBigausV1(Double_t *_x, Double_t *_par)
     Double_t parPeak[3] = {peakA, peakMu, peakSig};
 
     return bigaus(_x, parBigaus) + peak(_x, parPeak);
+}
+
+Double_t rettaBigaus(Double_t *_x, Double_t *_par)
+{
+    // peak
+    Double_t rX0 = _par[0];
+    Double_t rM = _par[1];
+    // bigaus
+    Double_t bigausMu = _par[2];
+    Double_t bigausA = _par[3];
+    Double_t bigausSigL = _par[4];
+    Double_t bigausSigR = _par[5];
+
+    // split the parameters
+    Double_t parBigaus[4] = {bigausA, bigausMu, bigausSigL, bigausSigR};
+
+    return bigaus(_x, parBigaus) + rM * (_x[0] - rX0);
 }
 
 Double_t exponentialFit(Double_t *_x, Double_t *_par)

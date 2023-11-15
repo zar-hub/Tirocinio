@@ -47,13 +47,13 @@ bool debugMessage(const std::string &message, bool condition)
 
 Bool_t analisi::GoodWP80(int i)
 {
-   if (!debugMessage("particle " + std::to_string(i), true))
-      return kFALSE;
+   debugMessage("particle " + std::to_string(i), false);
+  
    if (!debugMessage("missHits failed...", missHits[i] <= 0))
       return kFALSE;
-   if (!debugMessage("dist or dcot failed...", abs(dist[i]) >= 0.02 || abs(dcot[i]) >= 0.02))
+   if (!debugMessage("dist or dcot failed...", abs(dist[i]) > 0.02 || abs(dcot[i]) > 0.02))
       return kFALSE;
-   if (abs(eta[i]) <= 1.44)
+   if (abs(eta[i]) <= 1.4442)
    {
       if (!debugMessage("barrel", true))
          return kFALSE;
@@ -76,7 +76,7 @@ Bool_t analisi::GoodWP80(int i)
       if (!debugMessage("GOOD!", true))
          return kFALSE;
    }
-   else if (abs(eta[i]) >= 1.56)
+   else if (abs(eta[i]) >= 1.566 && (abs(eta[i]) <= 2.5))
    {
       if (!debugMessage("endcaps", true))
          return kFALSE;
@@ -121,13 +121,13 @@ void analisi::Loop()
    Long64_t discarded = 0;
 
    // fit functions
-   auto fitBarrelPassed = new TF1("fitBarrelPassed", biExpFit, fitMinX, fitMaxX, 4);
-   fitBarrelPassed->SetParNames("x0", "A", "kL", "kR");
-   fitBarrelPassed->SetParameters(90, 1000, 1, 1);
+   auto fitBarrelPassed = new TF1("fitBarrelPassed", rettaBigaus, fitMinX, fitMaxX, 6);
+   fitBarrelPassed->SetParNames("x0", "m", "mu", "A", "L", "R");
+   fitBarrelPassed->SetParameters(0, -0.02, 90, 1000, 1, 1);
 
-   auto fitEndcapsPassed = new TF1("fitEndcapsPassed", biExpFit, fitMinX, fitMaxX, 4);
-   fitEndcapsPassed->SetParNames("x0", "A", "kL", "kR");
-   fitEndcapsPassed->SetParameters(90, 1000, 1, 1);
+   auto fitEndcapsPassed = new TF1("fitEndcapsPassed", rettaBigaus, fitMinX, fitMaxX, 6);
+   fitEndcapsPassed->SetParNames("x0", "m", "mu", "A", "L", "R");
+   fitEndcapsPassed->SetParameters(0, -0.02, 90, 1000, 1, 1);
 
    auto fitBarrelFailed = new TF1("fitBarrelFailed", expBigausV0, fitMinX, fitMaxX, 7);
    fitBarrelFailed->SetParNames("x0 exp", "A exp", "k exp", "mu bigaus", "amplitude", "sigma left", "sigma right");
@@ -146,8 +146,8 @@ void analisi::Loop()
    canvas->Divide(2, 2);
 
    // style
-   gStyle->SetOptStat(000000011);
-   gStyle->SetOptFit(0001);
+   //gStyle->SetOptStat(000000011);
+   //gStyle->SetOptFit(0001);
 
    grBarrelPassed->GetXaxis()->SetTitle("mee");
    grBarrelPassed->GetYaxis()->SetTitle("events");
@@ -195,16 +195,16 @@ void analisi::Loop()
       // do statistic with the second
       if (GoodWP80(1))
       {
-         if (eta[1] <= 1.44)
+         if (eta[1] <= 1.4442)
             grBarrelPassed->Fill(mee);
-         if (eta[1] >= 1.566)
+         if ((abs(eta[1]) >= 1.566)  && (abs(eta[1]) <= 2.5))
             grEndcapsPassed->Fill(mee);
       }
       else
       {
-         if (eta[1] <= 1.44)
+         if (eta[1] <= 1.4442)
             grBarrelFailed->Fill(mee);
-         if (eta[1] >= 1.566)
+         if ((abs(eta[1]) >= 1.566)  && (abs(eta[1]) <= 2.5))
             grEndcapsFailed->Fill(mee);
       }
    }
@@ -228,14 +228,36 @@ void analisi::Loop()
 
    // Efficiency considerations
    cout << "-----------" << endl;
+
+   Double_t *_par;
+   fitBarrelFailed->GetParameters(_par);
+   Double_t bigausMu = _par[3];
+   Double_t bigausA = _par[4];
+   Double_t bigausSigL = _par[5];
+   Double_t bigausSigR = _par[6];
+   Double_t parBigaus[4] = {bigausA, bigausMu, bigausSigL, bigausSigR};
+   auto funBigaus = new TF1("mygaus", bigaus, 60,120, 4);
+   funBigaus->SetParameters(parBigaus);
+
+
    Double_t areaBarrelPassed = fitBarrelPassed->Integral(60, 120);
-   Double_t areaBarrelFailed = fitBarrelFailed->Integral(60, 120);
+   Double_t areaBarrelFailed = funBigaus->Integral(60,120);
+   //Double_t areaBarrelFailed = fitBarrelFailed->Integral(60, 120);
    Double_t areaEndcapsPassed = fitEndcapsPassed->Integral(60, 120);
    Double_t areaEndcapsFailed = fitEndcapsFailed->Integral(60, 120);
+
    cout << "Area under the curve for fitBarrelPassed: " << areaBarrelPassed << endl;
    cout << "Noisy area under the curve for fitBarrelFailed: " << areaBarrelFailed << endl;
    cout << "Area under the curve for fitEndcapsPassed: " << areaEndcapsPassed << endl;
    cout << "Noisy area under the curve for fitEndcapsFailed: " << areaEndcapsFailed << endl;
+   cout << grBarrelPassed->Integral() << endl;
+   // Calculate efficiencies
+   Double_t efficiencyBarrel = areaBarrelPassed / (areaBarrelPassed + areaBarrelFailed);
+   Double_t efficiencyEndcaps = areaEndcapsPassed / (areaEndcapsPassed + areaEndcapsFailed);
+
+   // Print efficiencies
+   cout << "Efficiency for Barrel: " << efficiencyBarrel << endl;
+   cout << "Efficiency for Endcaps: " << efficiencyEndcaps << endl;
 
    // save canvas
    canvas->SaveAs("canvas.png");
