@@ -16,15 +16,16 @@ se i due elettroni sono uno di barrel e uno di endcaps dove devo mettere i faile
 #include <iostream>
 #include <TLorentzVector.h>
 #include "fitFunctions.h"
+#include <TROOT.h>
 
 using namespace std;
 
 // DBG
-const bool DBG_GOODWP80 = true;
+const bool DBG_GOODWP80 = false;
 
 // Tweaking
-#define grMinX 55
-#define grMaxX 125
+#define grMinX 60
+#define grMaxX 120
 #define fitMinX 60
 #define fitMaxX 120
 
@@ -48,7 +49,7 @@ bool debugMessage(const std::string &message, bool condition)
 Bool_t analisi::GoodWP80(int i)
 {
    debugMessage("particle " + std::to_string(i), false);
-  
+
    if (!debugMessage("missHits failed...", missHits[i] <= 0))
       return kFALSE;
    if (!debugMessage("dist or dcot failed...", abs(dist[i]) > 0.02 || abs(dcot[i]) > 0.02))
@@ -146,8 +147,8 @@ void analisi::Loop()
    canvas->Divide(2, 2);
 
    // style
-   //gStyle->SetOptStat(000000011);
-   //gStyle->SetOptFit(0001);
+   gStyle->SetOptStat(000000011);
+   gStyle->SetOptFit(0001);
 
    grBarrelPassed->GetXaxis()->SetTitle("mee");
    grBarrelPassed->GetYaxis()->SetTitle("events");
@@ -197,18 +198,22 @@ void analisi::Loop()
       {
          if (eta[1] <= 1.4442)
             grBarrelPassed->Fill(mee);
-         if ((abs(eta[1]) >= 1.566)  && (abs(eta[1]) <= 2.5))
+         else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
             grEndcapsPassed->Fill(mee);
+         else
+            discarded++;
       }
       else
       {
          if (eta[1] <= 1.4442)
             grBarrelFailed->Fill(mee);
-         if ((abs(eta[1]) >= 1.566)  && (abs(eta[1]) <= 2.5))
+         else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
             grEndcapsFailed->Fill(mee);
+         else
+            discarded++;
       }
    }
-   cout << discarded << " discarded out of " << nentries << endl;
+
    // draw stuff
    canvas->cd(1);
    grBarrelPassed->Draw();
@@ -226,38 +231,49 @@ void analisi::Loop()
    grEndcapsFailed->Draw();
    grEndcapsFailed->Fit(fitEndcapsFailed);
 
+   // Some info on the data
+   cout << "------------- LOOP INFO -------------" << endl;
+   cout << "total entries: " << nentries << endl;
+   cout << "Barrel passed: " << grBarrelPassed->GetEntries() << " vs " << fitBarrelPassed->Integral(fitMinX, fitMaxX) << endl;
+   cout << "Barrel failed: " << grBarrelFailed->GetEntries() << " vs " << fitBarrelFailed->Integral(fitMinX, fitMaxX) << endl;
+   cout << "Endcaps passed: " << grEndcapsPassed->GetEntries() << " vs " << fitEndcapsPassed->Integral(fitMinX, fitMaxX) << endl;
+   cout << "Endcaps failed: " << grEndcapsFailed->GetEntries() << " vs " << fitEndcapsFailed->Integral(fitMinX, fitMaxX) << endl;
+   cout << "Discarded: " << discarded << endl;
+
    // Efficiency considerations
-   cout << "-----------" << endl;
+   // Set the amplitude of the peak to 0 to get only the noise
+   fitBarrelPassed->SetParameter("A", 0);
+   fitBarrelFailed->SetParameter("amplitude", 0);
+   fitEndcapsPassed->SetParameter("A", 0);
+   fitEndcapsFailed->SetParameter("amplitude", 0);
+   Double_t noiseBarrelPassed = fitBarrelPassed->Integral(fitMinX, fitMaxX);
+   Double_t noiseBarrelFailed = fitBarrelFailed->Integral(fitMinX, fitMaxX);
+   Double_t noiseEndcapsPassed = fitEndcapsPassed->Integral(fitMinX, fitMaxX);
+   Double_t noiseEndcapsFailed = fitEndcapsFailed->Integral(fitMinX, fitMaxX);
+   Double_t areaBarrelPassed = grBarrelPassed->Integral() - noiseBarrelPassed;
+   Double_t areaBarrelFailed = grBarrelFailed->Integral() - noiseBarrelFailed;
+   Double_t areaEndcapsPassed = grEndcapsPassed->Integral() - noiseEndcapsPassed;
+   Double_t areaEndcapsFailed = grEndcapsFailed->Integral() - noiseEndcapsFailed;
+   Double_t areaBarrel = areaBarrelPassed + areaBarrelFailed;
+   Double_t areaEndcaps = areaEndcapsPassed + areaEndcapsFailed;
 
-   Double_t *_par;
-   fitBarrelFailed->GetParameters(_par);
-   Double_t bigausMu = _par[3];
-   Double_t bigausA = _par[4];
-   Double_t bigausSigL = _par[5];
-   Double_t bigausSigR = _par[6];
-   Double_t parBigaus[4] = {bigausA, bigausMu, bigausSigL, bigausSigR};
-   auto funBigaus = new TF1("mygaus", bigaus, 60,120, 4);
-   funBigaus->SetParameters(parBigaus);
+   cout << "------------- EFFICIENCY -------------" << endl;
+   cout << "Area for BarrelPassed: " << areaBarrelPassed << " removed noise: " << noiseBarrelPassed << endl;
+   cout << "Area for BarrelFailed: " << areaBarrelFailed << " removed noise: " << noiseBarrelFailed << endl;
+   cout << "Area for EndcapsPassed: " << areaEndcapsPassed << " removed noise: " << noiseEndcapsPassed << endl;
+   cout << "Area for EndcapsFailed: " << areaEndcapsFailed << " removed noise: " << noiseEndcapsFailed << endl;
 
-
-   Double_t areaBarrelPassed = fitBarrelPassed->Integral(60, 120);
-   Double_t areaBarrelFailed = funBigaus->Integral(60,120);
-   //Double_t areaBarrelFailed = fitBarrelFailed->Integral(60, 120);
-   Double_t areaEndcapsPassed = fitEndcapsPassed->Integral(60, 120);
-   Double_t areaEndcapsFailed = fitEndcapsFailed->Integral(60, 120);
-
-   cout << "Area under the curve for fitBarrelPassed: " << areaBarrelPassed << endl;
-   cout << "Noisy area under the curve for fitBarrelFailed: " << areaBarrelFailed << endl;
-   cout << "Area under the curve for fitEndcapsPassed: " << areaEndcapsPassed << endl;
-   cout << "Noisy area under the curve for fitEndcapsFailed: " << areaEndcapsFailed << endl;
-   cout << grBarrelPassed->Integral() << endl;
    // Calculate efficiencies
    Double_t efficiencyBarrel = areaBarrelPassed / (areaBarrelPassed + areaBarrelFailed);
    Double_t efficiencyEndcaps = areaEndcapsPassed / (areaEndcapsPassed + areaEndcapsFailed);
+   Double_t sigmaAreaBarrelPassed = sqrt(areaBarrel * efficiencyBarrel * (1 - efficiencyBarrel));
+   Double_t sigmaAreaEndcapsPassed = sqrt(areaEndcaps * efficiencyEndcaps * (1 - efficiencyEndcaps));
+   Double_t sigmaEfficiencyBarrel = sigmaAreaBarrelPassed / areaBarrel;
+   Double_t sigmaEfficiencyEndcaps = sigmaAreaEndcapsPassed / areaEndcaps;
 
    // Print efficiencies
-   cout << "Efficiency for Barrel: " << efficiencyBarrel << endl;
-   cout << "Efficiency for Endcaps: " << efficiencyEndcaps << endl;
+   cout << "Efficiency for Barrel: " << efficiencyBarrel << "\u00b1" << sigmaEfficiencyBarrel << endl;
+   cout << "Efficiency for Endcaps: " << efficiencyEndcaps << "\u00b1" << sigmaEfficiencyEndcaps <<endl;
 
    // save canvas
    canvas->SaveAs("canvas.png");

@@ -12,7 +12,8 @@
 			"gauss.C": "cpp",
 			"plot.C": "cpp",
 			"iostream": "cpp",
-			"tests.C": "cpp"
+			"tests.C": "cpp",
+			"ostream": "cpp"
 		},
 		"C_Cpp.default.includePath": [
 			"/opt/root/include"

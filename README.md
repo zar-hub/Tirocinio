@@ -20,7 +20,8 @@ This project includes several key components:
 - [ ] remove noise from the failed graph
 - [ ] find efficiency
 - [ ] the area of the fit function is greater than the total number of events... which seems sus.
-- [ ] there are too many events (maybe?) 
+- [x] there are too many events (maybe?). Il problema era che venivano usati gli estremi del grafico e non gli estremi della funzione. Non ho capito il perché.
+
 
 ## Notes
 - I chanded fitBarrel/EndcapsPassed to a double sided exp because using the two sided gaussian with a peak it would not converge.
