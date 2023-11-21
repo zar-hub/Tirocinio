@@ -147,8 +147,15 @@ void analisi::Loop()
    canvas->Divide(2, 2);
 
    // style
-   gStyle->SetOptStat(000000011);
-   gStyle->SetOptFit(0001);
+   gROOT->SetStyle("Plain");
+   gStyle->SetOptTitle(0);
+   gStyle->SetOptStat(0);
+   gStyle->SetOptFit(101);
+   gStyle->SetStatX(.89);
+   gStyle->SetStatY(.89);
+   gStyle->SetStatW(.17);
+   gStyle->SetStatH(.17);
+   gStyle->SetStatBorderSize(0);
 
    grBarrelPassed->GetXaxis()->SetTitle("mee");
    grBarrelPassed->GetYaxis()->SetTitle("events");
@@ -167,15 +174,26 @@ void analisi::Loop()
    grBarrelFailed->SetLineColor(kRed);
    grEndcapsPassed->SetLineColor(kGreen);
    grEndcapsFailed->SetLineColor(kRed);
-   grBarrelPassed->SetFillColor(407);
-   grEndcapsPassed->SetFillColor(407);
+
+   grBarrelPassed->SetFillColor(kTeal);
+   grEndcapsPassed->SetFillColor(kTeal);
    grBarrelFailed->SetFillColor(40);
    grEndcapsFailed->SetFillColor(40);
 
-   fitBarrelPassed->SetLineColor(kGreen);
-   fitEndcapsPassed->SetLineColor(kGreen);
-   fitBarrelFailed->SetLineColor(kRed);
-   fitEndcapsFailed->SetLineColor(kRed);
+   grBarrelPassed->SetLineColor(kGreen + 1);
+   grEndcapsPassed->SetLineColor(kGreen + 1);
+   grBarrelFailed->SetLineColor(kRed);
+   grEndcapsFailed->SetLineColor(kRed);
+
+   fitBarrelPassed->SetLineColor(kGreen + 1);
+   fitEndcapsPassed->SetLineColor(kGreen + 1);
+   fitBarrelFailed->SetLineColor(kRed - 2);
+   fitEndcapsFailed->SetLineColor(kRed - 2);
+
+   fitBarrelPassed->SetLineStyle(9);
+   fitBarrelFailed->SetLineStyle(9);
+   fitEndcapsPassed->SetLineStyle(9);
+   fitEndcapsFailed->SetLineStyle(9);
 
    for (Long64_t jentry = 0; jentry < nentries; jentry++)
    {
@@ -221,7 +239,20 @@ void analisi::Loop()
 
    canvas->cd(2);
    grBarrelFailed->Draw();
-   grBarrelFailed->Fit(fitBarrelFailed);
+   grBarrelFailed->Fit(fitBarrelFailed, "R0");
+   // draw the exponential part
+   auto fitBarrelFailedExp = new TF1("fitBarrelFailedExp", exponentialFit, fitMinX, fitMaxX, 3);
+   fitBarrelFailedExp->SetParNames("x0", "A", "k");
+   fitBarrelFailedExp->SetParameters(fitBarrelFailed->GetParameter("x0 exp"), fitBarrelFailed->GetParameter("A exp"), fitBarrelFailed->GetParameter("k exp"));
+   fitBarrelFailedExp->SetLineColor(kRed - 2);
+   fitBarrelFailedExp->SetLineStyle(2);
+   fitBarrelFailedExp->Draw("same");
+   //  now draw the bigaussian part
+   auto fitBarrelFailedBigaus = new TF1("fitBarrelFailedBigaus", bigaus, fitMinX, fitMaxX, 4);
+   fitBarrelFailedBigaus->SetParNames("amplitude", "mu", "sigma left", "sigma right");
+   fitBarrelFailedBigaus->SetParameters(fitBarrelFailed->GetParameter("amplitude"), fitBarrelFailed->GetParameter("mu bigaus"), fitBarrelFailed->GetParameter("sigma left"), fitBarrelFailed->GetParameter("sigma right"));
+   fitBarrelFailedBigaus->SetLineColor(kRed);
+   fitBarrelFailedBigaus->Draw("same");
 
    canvas->cd(3);
    grEndcapsPassed->Draw();
@@ -246,10 +277,10 @@ void analisi::Loop()
    fitBarrelFailed->SetParameter("amplitude", 0);
    fitEndcapsPassed->SetParameter("A", 0);
    fitEndcapsFailed->SetParameter("amplitude", 0);
-   Double_t noiseBarrelPassed = fitBarrelPassed->Integral(fitMinX, fitMaxX);
-   Double_t noiseBarrelFailed = fitBarrelFailed->Integral(fitMinX, fitMaxX);
-   Double_t noiseEndcapsPassed = fitEndcapsPassed->Integral(fitMinX, fitMaxX);
-   Double_t noiseEndcapsFailed = fitEndcapsFailed->Integral(fitMinX, fitMaxX);
+   Double_t noiseBarrelPassed = fitBarrelPassed->Integral(fitMinX, fitMaxX) / grBarrelPassed->GetBinWidth(1);
+   Double_t noiseBarrelFailed = fitBarrelFailed->Integral(fitMinX, fitMaxX) / grBarrelFailed->GetBinWidth(1);
+   Double_t noiseEndcapsPassed = fitEndcapsPassed->Integral(fitMinX, fitMaxX) / grEndcapsPassed->GetBinWidth(1);
+   Double_t noiseEndcapsFailed = fitEndcapsFailed->Integral(fitMinX, fitMaxX) / grEndcapsFailed->GetBinWidth(1);
    Double_t areaBarrelPassed = grBarrelPassed->Integral() - noiseBarrelPassed;
    Double_t areaBarrelFailed = grBarrelFailed->Integral() - noiseBarrelFailed;
    Double_t areaEndcapsPassed = grEndcapsPassed->Integral() - noiseEndcapsPassed;
@@ -273,7 +304,7 @@ void analisi::Loop()
 
    // Print efficiencies
    cout << "Efficiency for Barrel: " << efficiencyBarrel << "\u00b1" << sigmaEfficiencyBarrel << endl;
-   cout << "Efficiency for Endcaps: " << efficiencyEndcaps << "\u00b1" << sigmaEfficiencyEndcaps <<endl;
+   cout << "Efficiency for Endcaps: " << efficiencyEndcaps << "\u00b1" << sigmaEfficiencyEndcaps << endl;
 
    // save canvas
    canvas->SaveAs("canvas.png");
