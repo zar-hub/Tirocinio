@@ -15,7 +15,8 @@
 			"tests.C": "cpp",
 			"ostream": "cpp",
 			"test.C": "cpp",
-			"testSmartGraph.C": "cpp"
+			"testSmartGraph.C": "cpp",
+			"testBinaryFIlter.C": "cpp"
 		},
 		"C_Cpp.default.includePath": [
 			"/opt/root/include"

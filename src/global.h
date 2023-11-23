@@ -5,6 +5,7 @@
 #include <TROOT.h>
 #include <iostream>
 #include "../analisi.h"
+#include "fitFunctions.h"
 
 using namespace std;
 
@@ -16,14 +17,51 @@ using namespace std;
 #define fitMinX 60
 #define fitMaxX 120
 
-// < FIT PARAMETERS />
-vector<string> rettaBigausNames = {"line y-intercept", "line angular coeff.", "normal mean", "normal amplitude", "sigma left", "sigma right"};
-vector<Double_t> rettaBigausParam = {0, -0.02, 90, 1000, 1, 1};
-
 // < DEBUGGING />
 const bool DBG_GOODWP80 = false;
 const bool DBG_CHARGE = true;
 
+// < PRINTING />
+void printHeader(const string &message)
+{
+   cout << endl
+        << "==============================" << endl
+        << message << endl
+        << "==============================" << endl
+        << endl;
+}
+
+class identCout
+{
+   int ident_level = 0;
+   string ident_string = "├──";
+   string ident(int n)
+   {
+      string s = "";
+      for (int i = 0; i < n; i++)
+      {
+            s += ident_string;
+      }
+      return s;
+   }
+
+public:
+   ostream &operator<<(const string &message)
+   {
+      cout << ident(ident_level) << message;
+      return cout;
+   }
+   void identUp()
+   {
+      ident_level++;
+   }
+   void identDown()
+   {
+      ident_level--;
+   }
+};
+
+// < FUNCTIONS />
 /**
  * @brief Prints a debug message if the condition is false,
  *        it is a wrapper, does not change the flow of the program.
@@ -59,9 +97,10 @@ string capitalize(string s)
    return s;
 }
 
-void setGlobalStyle(){
+void setGlobalStyle()
+{
    gROOT->SetStyle("Plain");
-   gStyle->SetOptTitle(0);
+   gStyle->SetOptTitle(1);
    gStyle->SetOptStat(0);
    gStyle->SetOptFit(101);
    gStyle->SetStatX(.89);
@@ -70,5 +109,16 @@ void setGlobalStyle(){
    gStyle->SetStatH(.17);
    gStyle->SetStatBorderSize(0);
 }
+
+// < FIT PROTOTYPES />
+vector<string> rettaBigausNames = {"line y-intercept", "line angular coeff.", "normal mean", "normal amplitude", "sigma left", "sigma right"};
+vector<Double_t> rettaBigausDefParam = {0, -0.02, 90, 1000, 1, 1};
+FitPrototype rettaBigausPrototype(rettaBigausNames, rettaBigausDefParam, rettaBigaus, "normal amplitude", "line angular coeff.", fitMinX, fitMaxX);
+
+vector<string> expBigausNames = {"exp x0", "exp amplitude", "exp k", "normal mean", "normal amplitude", "sigma left", "sigma right"};
+vector<Double_t> expBigausDefParam = {36, 305, 0.02, 90, 590, 5, 4};
+FitPrototype expBigausPrototype(expBigausNames, expBigausDefParam, expBigausV0, "normal amplitude", "exp amplitude", fitMinX, fitMaxX);
+
+identCout icout;
 
 #endif // __GLOBAL_H__
