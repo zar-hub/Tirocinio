@@ -6,107 +6,25 @@ se i due elettroni sono uno di barrel e uno di endcaps dove devo mettere i faile
 */
 
 #define analisi_cxx
-#include "analisi.h"
+#include "src/global.h"
+#include "src/fitFunctions.h"
+#include "src/conditions.h"
+
+#include <math.h>
 #include <TH1F.h>
 #include <TH2.h>
 #include <TF1.h>
 #include <TStyle.h>
 #include <TCanvas.h>
-#include <math.h>
-#include <iostream>
 #include <TLorentzVector.h>
-#include "fitFunctions.h"
-#include <TROOT.h>
 
 using namespace std;
-
-// DBG
-const bool DBG_GOODWP80 = false;
 
 // Tweaking
 #define grMinX 60
 #define grMaxX 120
 #define fitMinX 60
 #define fitMaxX 120
-
-/**
- * @brief Prints a debug message if the condition is false,
- *        it is a wrapper, does not change the flow of the program.
- *
- * @param message The message to print.
- * @param condition The condition to check.
- * @return The value of the condition.
- */
-bool debugMessage(const std::string &message, bool condition)
-{
-   if (DBG_GOODWP80 && !condition)
-   {
-      cout << message << endl;
-   }
-   return condition;
-}
-
-Bool_t analisi::GoodWP80(int i)
-{
-   debugMessage("particle " + std::to_string(i), false);
-
-   if (!debugMessage("missHits failed...", missHits[i] <= 0))
-      return kFALSE;
-   if (!debugMessage("dist or dcot failed...", abs(dist[i]) > 0.02 || abs(dcot[i]) > 0.02))
-      return kFALSE;
-   if (abs(eta[i]) <= 1.4442)
-   {
-      if (!debugMessage("barrel", true))
-         return kFALSE;
-      if (!debugMessage("combined ISO failed...", abs(combinedIso[i] / pt[i]) < 0.07))
-         return kFALSE;
-      if (!debugMessage("tracker ISO failed...", abs(trackerIso[i] / pt[i]) < 0.09))
-         return kFALSE;
-      if (!debugMessage("ecal ISO failed...", abs(ecalJIso[i] / pt[i]) < 0.07))
-         return kFALSE;
-      if (!debugMessage("hcal ISO failed...", abs(hcalIso[i] / pt[i]) < 0.10))
-         return kFALSE;
-      if (!debugMessage("deta failed...", abs(deta[i]) < 0.004))
-         return kFALSE;
-      if (!debugMessage("dphi failed...", abs(dphi[i]) < 0.06))
-         return kFALSE;
-      if (!debugMessage("hoe failed...", abs(hoe[i]) < 0.04))
-         return kFALSE;
-      if (!debugMessage("see failed...", abs(see[i]) < 0.01))
-         return kFALSE;
-      if (!debugMessage("GOOD!", true))
-         return kFALSE;
-   }
-   else if (abs(eta[i]) >= 1.566 && (abs(eta[i]) <= 2.5))
-   {
-      if (!debugMessage("endcaps", true))
-         return kFALSE;
-      if (!debugMessage("combined ISO failed...", abs(combinedIso[i] / pt[i]) < 0.06))
-         return kFALSE;
-      if (!debugMessage("tracker ISO failed...", abs(trackerIso[i] / pt[i]) < 0.04))
-         return kFALSE;
-      if (!debugMessage("ecalJISO failed...", abs(ecalJIso[i] / pt[i]) < 0.05))
-         return kFALSE;
-      if (!debugMessage("hcal ISO failed...", abs(hcalIso[i] / pt[i]) < 0.025))
-         return kFALSE;
-      if (!debugMessage("deta failed...", abs(deta[i]) < 0.007))
-         return kFALSE;
-      if (!debugMessage("dphi failed...", abs(dphi[i]) < 0.03))
-         return kFALSE;
-      if (!debugMessage("hoe failed...", abs(hoe[i]) < 0.025))
-         return kFALSE;
-      if (!debugMessage("see failed...", abs(see[i]) < 0.03))
-         return kFALSE;
-      if (!debugMessage("GOOD!", true))
-         return kFALSE;
-   }
-   else
-   {
-      if (!debugMessage("outside range...", false))
-         return kFALSE;
-   }
-   return kTRUE;
-}
 
 void analisi::Loop()
 {
@@ -139,12 +57,15 @@ void analisi::Loop()
    fitEndcapsFailed->SetParameters(36, 305, 0.02, 90, 590, 5, 4);
 
    // canvas & graphs
+   // < Main analisi >
    auto canvas = new TCanvas("mycanvas", "mycanvas", 0, 0, 1600, 1000);
    auto grBarrelPassed = new TH1D("WP80BRLPSS", "WP80 barrel passed", 60, grMinX, grMaxX);
    auto grBarrelFailed = new TH1D("WP80BRLFLD", "WP80 barrel failed", 60, grMinX, grMaxX);
    auto grEndcapsPassed = new TH1D("WP80ENDCPSS", "WP80 endcaps passed", 60, grMinX, grMaxX);
    auto grEndcapsFailed = new TH1D("WP80ENDCFLD", "WP80 endcaps failed", 60, grMinX, grMaxX);
    canvas->Divide(2, 2);
+
+   // < Filter by electron charge >
 
    // style
    gROOT->SetStyle("Plain");
@@ -170,11 +91,6 @@ void analisi::Loop()
    grEndcapsFailed->GetYaxis()->SetTitle("events");
 
    // Set line colors
-   grBarrelPassed->SetLineColor(kGreen);
-   grBarrelFailed->SetLineColor(kRed);
-   grEndcapsPassed->SetLineColor(kGreen);
-   grEndcapsFailed->SetLineColor(kRed);
-
    grBarrelPassed->SetFillColor(kTeal);
    grEndcapsPassed->SetFillColor(kTeal);
    grBarrelFailed->SetFillColor(40);
@@ -211,6 +127,7 @@ void analisi::Loop()
          discarded++;
          continue;
       }
+
       // do statistic with the second
       if (GoodWP80(1))
       {
@@ -239,20 +156,7 @@ void analisi::Loop()
 
    canvas->cd(2);
    grBarrelFailed->Draw();
-   grBarrelFailed->Fit(fitBarrelFailed, "R0");
-   // draw the exponential part
-   auto fitBarrelFailedExp = new TF1("fitBarrelFailedExp", exponentialFit, fitMinX, fitMaxX, 3);
-   fitBarrelFailedExp->SetParNames("x0", "A", "k");
-   fitBarrelFailedExp->SetParameters(fitBarrelFailed->GetParameter("x0 exp"), fitBarrelFailed->GetParameter("A exp"), fitBarrelFailed->GetParameter("k exp"));
-   fitBarrelFailedExp->SetLineColor(kRed - 2);
-   fitBarrelFailedExp->SetLineStyle(2);
-   fitBarrelFailedExp->Draw("same");
-   //  now draw the bigaussian part
-   auto fitBarrelFailedBigaus = new TF1("fitBarrelFailedBigaus", bigaus, fitMinX, fitMaxX, 4);
-   fitBarrelFailedBigaus->SetParNames("amplitude", "mu", "sigma left", "sigma right");
-   fitBarrelFailedBigaus->SetParameters(fitBarrelFailed->GetParameter("amplitude"), fitBarrelFailed->GetParameter("mu bigaus"), fitBarrelFailed->GetParameter("sigma left"), fitBarrelFailed->GetParameter("sigma right"));
-   fitBarrelFailedBigaus->SetLineColor(kRed);
-   fitBarrelFailedBigaus->Draw("same");
+   grBarrelFailed->Fit(fitBarrelFailed);
 
    canvas->cd(3);
    grEndcapsPassed->Draw();

@@ -104,13 +104,13 @@ Double_t expBigausV0(Double_t *_x, Double_t *_par)
     Double_t k = _par[2];
     // bigaus
     Double_t bigausMu = _par[3];
-    Double_t bigausA = _par[4];
-    Double_t bigausSigL = _par[5];
-    Double_t bigausSigR = _par[6];
+    Double_t bigausAmplitude = _par[4];
+    Double_t bigausSigLeft = _par[5];
+    Double_t bigausSigRight = _par[6];
 
     // split the parameters
     Double_t parExp[3] = {x0, A, k};
-    Double_t parBigaus[4] = {bigausA, bigausMu, bigausSigL, bigausSigR};
+    Double_t parBigaus[4] = {bigausAmplitude, bigausMu, bigausSigLeft, bigausSigRight};
 
     return bigaus(_x, parBigaus) + exponentialFit(_x, parExp);
 }

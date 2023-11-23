@@ -203,6 +203,7 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    virtual Bool_t   GoodWP80(int i);
+   virtual Bool_t   IsElectron(int i);
 };
 
 #endif
