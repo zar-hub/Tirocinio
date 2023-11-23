@@ -16,18 +16,19 @@ public:
     SmartGraph *passed;
     SmartGraph *failed;
 
-    BinaryFilter(const string &name, FitPrototype &passedPrototype, FitPrototype &failedPrototype) : name(name)
+    BinaryFilter(const string &name, FitPrototype &passedPrototype, FitPrototype &failedPrototype, TVirtualPad *padPassed, TVirtualPad *padFailed) : name(name)
     {
-        passed = new SmartGraph((name + "Passed").c_str(), passedPrototype);
-        failed = new SmartGraph((name + "Failed").c_str(), failedPrototype);
+        passed = new SmartGraph((name + "Passed").c_str(), passedPrototype, padPassed);
+        failed = new SmartGraph((name + "Failed").c_str(), failedPrototype, padFailed);
         passed->setStyle(true);
         failed->setStyle(false);
     }
 
-    void Fit()
+    void FitAndDraw()
     {
-        passed->Fit();
-        failed->Fit();
+        // the two operations must be done both
+        passed->FitAndDraw();
+        failed->FitAndDraw();
         areaPassed = passed->getSignalIntegral();
         areaFailed = failed->getSignalIntegral();
         efficiency = areaPassed / (areaPassed + areaFailed);

@@ -5,6 +5,8 @@
 #include <TROOT.h>
 #include <TH1D.h>
 #include <TF1.h>
+#include <TCanvas.h>
+#include <TPad.h>
 
 class SmartGraph
 {
@@ -14,6 +16,7 @@ class SmartGraph
     TF1 *fit;
     TF1 *noiseFit;
     FitPrototype *prototype;
+    TVirtualPad *pad;
 
     // results
     Double_t rawSignal;
@@ -21,7 +24,7 @@ class SmartGraph
     Double_t signal;
 
 public:
-    SmartGraph(const string &name, FitPrototype &prototype) : name(name), prototype(&prototype)
+    SmartGraph(const string &name, FitPrototype &prototype, TVirtualPad* pad) : name(name), prototype(&prototype), pad(pad)
     {
         histo = new TH1D(name.c_str(), name.c_str(), grBins, grMinX, grMaxX);
         histo->GetXaxis()->SetTitle("Variable: mee");
@@ -73,13 +76,27 @@ public:
 
     void Draw(const char *option = "")
     {
+        pad->cd();
         histo->Draw(option);
     }
 
     void drawNoise(const char *option = "")
     {
+        if (fit == nullptr)
+            return;
+        
+        pad->cd();
         noiseFit = prototype->getNoise(fit);
         noiseFit->Draw(option);
+    }
+
+    void FitAndDraw(){
+        // the order is important!
+        // one cannot fit and then draw the noise
+        // because the noise is calculated from the fit
+        this->Draw();
+        this->Fit();
+        this->drawNoise("same");
     }
 
     void Fit()

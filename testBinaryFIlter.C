@@ -16,10 +16,10 @@ void analisi::Loop()
 
     // create canvas and SmartGraphs
     auto canvas = new TCanvas("mycanvas", "mycanvas", 0, 0, 1600, 1000);
-    auto grBarrel = new BinaryFilter("barrel", rettaBigausPrototype, expBigausPrototype);
-    auto grEndcaps = new BinaryFilter("endcaps", rettaBigausPrototype, expBigausPrototype);
-    canvas->Divide(2, 1);
-
+    canvas->Divide(2, 2);
+    auto grBarrel = new BinaryFilter("barrel", rettaBigausPrototype, expBigausPrototype, canvas->GetPad(1), canvas->GetPad(2));
+    auto grEndcaps = new BinaryFilter("endcaps", rettaBigausPrototype, expBigausPrototype, canvas->GetPad(3), canvas->GetPad(4));
+    
     // style
     setGlobalStyle();
     // health check
@@ -59,20 +59,11 @@ void analisi::Loop()
         }
     }
 
-    // draw
-    canvas->cd(1);
-    grBarrel->passed->Draw();
-    grBarrel->passed->drawNoise("same");
-
-    canvas->cd(2);
-    grBarrel->failed->Draw();
-    // grBarrel->failed->drawNoise("same");
-
-    // fit
-    grBarrel->Fit();
-
+    // Draw the graphs
+    grBarrel->FitAndDraw();
+    grEndcaps->FitAndDraw();
 
     printHeader("Fit results");
     grBarrel->printInfo();
-    //grEndcaps->printInfo();
+    grEndcaps->printInfo();
 }
