@@ -19,7 +19,7 @@ void analisi::Loop()
     canvas->Divide(2, 2);
     auto grBarrel = new BinaryFilter("barrel", rettaBigausPrototype, expBigausPrototype, canvas->GetPad(1), canvas->GetPad(2));
     auto grEndcaps = new BinaryFilter("endcaps", rettaBigausPrototype, expBigausPrototype, canvas->GetPad(3), canvas->GetPad(4));
-    
+
     // style
     setGlobalStyle();
     // health check
