@@ -13,15 +13,21 @@
 
 void analisi::Loop()
 {
-
-    // create canvas and SmartGraphs
-    auto canvas = new TCanvas("mycanvas", "mycanvas", 0, 0, 1600, 1000);
-    canvas->Divide(2, 2);
-    auto grBarrel = new BinaryFilter("barrel", rettaBigausPrototype, expBigausPrototype, canvas->GetPad(1), canvas->GetPad(2));
-    auto grEndcaps = new BinaryFilter("endcaps", rettaBigausPrototype, expBigausPrototype, canvas->GetPad(3), canvas->GetPad(4));
-
     // style
     setGlobalStyle();
+
+    int test = 0;
+
+    // create canvas and SmartGraphs
+    auto canvas0 = new TCanvas("mycanvas0", "mycanvas0", 0, 0, 1600, 1000);
+    auto canvas1 = new TCanvas("mycanvas1", "mycanvas1", 0, 0, 1600, 1000);
+    canvas0->Divide(2, 2);
+    canvas1->Divide(2, 2);
+    auto grEleBarrel = new BinaryFilter("barrelElectron", rettaBigausPrototype, expBigausPrototype, canvas0->GetPad(1), canvas0->GetPad(2));
+    auto grEleEndcaps = new BinaryFilter("endcapsElectron", rettaBigausPrototype, expBigausPrototype, canvas0->GetPad(3), canvas0->GetPad(4));
+    auto grPosBarrel = new BinaryFilter("barrelPositron", rettaBigausPrototype, expBigausPrototype, canvas1->GetPad(1), canvas1->GetPad(2));
+    auto grPosEndcaps = new BinaryFilter("endcapsPositron", rettaBigausPrototype, expBigausPrototype, canvas1->GetPad(3), canvas1->GetPad(4));
+
     // health check
     if (fChain == 0)
         return;
@@ -45,25 +51,49 @@ void analisi::Loop()
         // do statistic with the second
         if (GoodWP80(1))
         {
-            if (eta[1] <= 1.4442)
-                grBarrel->passed->Fill(mee);
-            else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
-                grEndcaps->passed->Fill(mee);
+            if (charge[1] < 0)
+            {
+                if (eta[1] <= 1.4442)
+                    grEleBarrel->passed->Fill(mee);
+                else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
+                    grEleEndcaps->passed->Fill(mee);
+            }
+            else if (charge[1] > 0)
+            {
+                if (eta[1] <= 1.4442)
+                    grPosBarrel->passed->Fill(mee);
+                else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
+                    grPosEndcaps->passed->Fill(mee);
+            }
         }
         else
         {
-            if (eta[1] <= 1.4442)
-                grBarrel->failed->Fill(mee);
-            else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
-                grEndcaps->failed->Fill(mee);
+            if (charge[1] < 0)
+            {
+                if (eta[1] <= 1.4442)
+                    grEleBarrel->failed->Fill(mee);
+                else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
+                    grEleEndcaps->failed->Fill(mee);
+            }
+            else if (charge[1] > 0)
+            {
+                if (eta[1] <= 1.4442)
+                    grPosBarrel->failed->Fill(mee);
+                else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
+                    grPosEndcaps->failed->Fill(mee);
+            }
         }
     }
 
     // Draw the graphs
-    grBarrel->FitAndDraw();
-    grEndcaps->FitAndDraw();
+    grPosBarrel->FitAndDraw();
+    grPosEndcaps->FitAndDraw();
+    grEleBarrel->FitAndDraw();
+    grEleEndcaps->FitAndDraw();
 
     printHeader("Fit results");
-    grBarrel->printInfo();
-    grEndcaps->printInfo();
+    grPosBarrel->printInfo();
+    grPosEndcaps->printInfo();
+    grEleBarrel->printInfo();
+    grEleEndcaps->printInfo();
 }
