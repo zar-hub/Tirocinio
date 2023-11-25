@@ -23,9 +23,10 @@ void analisi::Loop()
     canvas->Divide(1, 1); // hack to create a single pad
     TVirtualPad *rootPad = canvas->GetPad(1);
     // leaf element
-    auto grBarrel = new BinaryFilter("Barrel", expBigausPrototype, rootPad);
+    // auto grBarrel = new BinaryFilter("Barrel", expBigausPrototype, rootPad);
     
-    // style
+    auto grBarrel = new BinaryFilter("barrel", testCondition, expBigausPrototype, expBigausPrototype, rootPad);
+
     setGlobalStyle();
     // health check
     if (fChain == 0)
@@ -51,14 +52,14 @@ void analisi::Loop()
         if (GoodWP80(1))
         {
             if (eta[1] <= 1.4442)
-                grBarrel->histo->Fill(mee);
+                grBarrel->getLeft()->histo->Fill(mee);
             //else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
             // grEndcaps->passed->Fill(mee);
         }
         else
         {
             if (eta[1] <= 1.4442)
-                grBarrel->histo->Fill(mee);
+                grBarrel->getRight()->histo->Fill(mee);
            // else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
             // grEndcaps->failed->Fill(mee);
         }
@@ -73,6 +74,6 @@ void analisi::Loop()
     // test draw
     // grBarrel->left->histo->Draw();
 
-    //grBarrel->printInfo();
+    grBarrel->printInfo();
     // grEndcaps->printInfo();
 }

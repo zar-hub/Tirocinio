@@ -13,11 +13,11 @@ class BinaryFilter
     Double_t efficencyError;
     Bool_t (*filter)() = nullptr;
     Bool_t isLeaf = false;
+    BinaryFilter *left = nullptr;  // left child
+    BinaryFilter *right = nullptr; // right child
 
 public:
     SmartGraph *histo;             // this is the histo of the PARENT!
-    BinaryFilter *left = nullptr;  // left child
-    BinaryFilter *right = nullptr; // right child
 
     BinaryFilter(const string &name, FitPrototype &fitPrototype, TVirtualPad *nodePad) : name(name)
     {
@@ -56,8 +56,29 @@ public:
         return areaPassed + areaFailed;
     }
 
+    BinaryFilter* getLeft() {
+        if (left == nullptr) {
+            throw std::runtime_error("Left child is nullptr");
+        }
+        return left;
+    }
+
+    BinaryFilter* getRight() {
+        if (right == nullptr) {
+            throw std::runtime_error("Right child is nullptr");
+        }
+        return right;
+    }
+
     void printInfo()
     {
+        if(isLeaf) {
+            icout << "BinaryFilter leaf: " << name << endl;
+            icout.identUp();
+            histo->printInfo();
+            icout.identDown();
+            return;
+        }
         icout << "BinaryFilter: " << name << endl;
         icout.identUp();
         icout << "Passed: " << endl;
