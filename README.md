@@ -1,26 +1,17 @@
 # Tirocinio 
 
-This is a C++ project that uses the ROOT framework for data analysis in particle physics. The project includes various fit functions and analysis methods to study properties of particles.
+## Bug fixed:
+- There was a problem in `analisi.C` where the barrel and endcaps positions where not tested with `abs()` function. This resulted in more events beeing passed in the barrel than the ones in the funciton `filters::GoodWP80(int)`.
+
 
 ## Description
 ![graph](canvas.png)
-This project includes several key components:
 
-- Fit functions: These are defined in `fitFunctions.h` and include various fit functions used in the analysis.
-- Analysis code: The main analysis code is contained in `analisi.C` and `analisi.h`.
-- Data: The data for the analysis is stored in ROOT files.
+Main classes:
 
-## TODO
 
-- [x] Improve fit functions.
-- [ ] Improve the plotting code.
-- [ ] Write tests for the analysis code.
-- [ ] Document the code.
-- [ ] fitEndcapsFailed does not converge
-- [ ] remove noise from the failed graph
-- [ ] find efficiency
-- [ ] the area of the fit function is greater than the total number of events... which seems sus.
-- [x] there are too many events (maybe?). Il problema era che venivano usati gli estremi del grafico e non gli estremi della funzione. Non ho capito il perché.
+
+
 
 
 ## Notes

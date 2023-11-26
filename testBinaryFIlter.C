@@ -1,6 +1,6 @@
 #define analisi_cxx
 #include "src/global.h"
-#include "src/conditions.h"
+#include "src/filters.h"
 #include "src/fitFunctions.h"
 #include "src/SmartGraph.h"
 #include "src/BinaryFilter.h"
@@ -11,69 +11,58 @@
 #include <TSystem.h>
 #include <TF1.h>
 
-Bool_t testCondition(){
-    return true;
-}
-
 void analisi::Loop()
 {
+    // load data in the filters namespace
+    filters::loadData(this);
 
     // create canvas and SmartGraphs
     auto canvas = new TCanvas("mycanvas", "mycanvas", 0, 0, 1600, 1000);
     canvas->Divide(1, 1); // hack to create a single pad
+
     TVirtualPad *rootPad = canvas->GetPad(1);
-    // leaf element
-    // auto grBarrel = new BinaryFilter("Barrel", expBigausPrototype, rootPad);
-    
-    auto grBarrel = new BinaryFilter("barrel", testCondition, expBigausPrototype, expBigausPrototype, rootPad);
+    FilterTree tree("", "g");
+    tree.root->require("tagGood", filters::isTagGood, "g");
+    tree.root->branch("positive", filters::isPositive, "g");
 
-    setGlobalStyle();
-    // health check
-    if (fChain == 0)
-        return;
+    tree.root->left->branchLeft("barrel", filters::isBarrel, "g");
+    tree.root->left->left->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
+    ;
 
-    // variable definitions
-    Long64_t nentries = fChain->GetEntriesFast();
-    Long64_t nbytes = 0, nb = 0;
+    tree.root->left->branchRight("endcaps", filters::isEndcaps, "g");
+    tree.root->left->right->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
 
-    for (Long64_t jentry = 0; jentry < nentries; jentry++)
+    tree.root->right->branchLeft("barrel", filters::isBarrel, "g");
+    tree.root->right->left->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
+
+    tree.root->right->branchRight("endcaps", filters::isEndcaps, "g");
+    tree.root->right->right->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
+
+    tree.root->setPad(rootPad);
+
+    if (1)
     {
-        Long64_t ientry = LoadTree(jentry);
-        if (ientry < 0)
-            break;
-        nb = fChain->GetEntry(jentry);
-        nbytes += nb;
+        setGlobalStyle();
+        // health check
+        if (fChain == 0)
+            return;
 
-        // fill the graphs
-        if (!GoodWP80(0))
-            continue;
+        // variable definitions
+        Long64_t nentries = fChain->GetEntriesFast();
+        Long64_t nbytes = 0, nb = 0;
 
-        // do statistic with the second
-        if (GoodWP80(1))
+        for (Long64_t jentry = 0; jentry < nentries; jentry++)
         {
-            if (eta[1] <= 1.4442)
-                grBarrel->getLeft()->histo->Fill(mee);
-            //else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
-            // grEndcaps->passed->Fill(mee);
-        }
-        else
-        {
-            if (eta[1] <= 1.4442)
-                grBarrel->getRight()->histo->Fill(mee);
-           // else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
-            // grEndcaps->failed->Fill(mee);
+            Long64_t ientry = LoadTree(jentry);
+            if (ientry < 0)
+                break;
+            nb = fChain->GetEntry(jentry);
+            nbytes += nb;
+
+            tree.root->Fill(mee);
         }
     }
 
-    // Draw the graphs
-    grBarrel->FitAndDraw();
-    // grEndcaps->FitAndDraw();
-
-    printHeader("Fit results");
-    
-    // test draw
-    // grBarrel->left->histo->Draw();
-
-    grBarrel->printInfo();
-    // grEndcaps->printInfo();
+    tree.root->FitAndDraw();
+    tree.printTree(tree.root);
 }

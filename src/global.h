@@ -19,7 +19,7 @@ using namespace std;
 
 // < DEBUGGING />
 const bool DBG_GOODWP80 = false;
-const bool DBG_CHARGE = true;
+const bool DBG_CHARGE = false;
 
 // < PRINTING />
 void printHeader(const string &message)
