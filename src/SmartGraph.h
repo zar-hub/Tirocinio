@@ -19,9 +19,9 @@ class SmartGraph
     TVirtualPad *pad = nullptr;
 
     // results
-    Double_t rawSignal;
-    Double_t noise;
-    Double_t signal;
+    Double_t rawSignal=-1;
+    Double_t noise=-1;
+    Double_t signal=-1;
 
     // helpers
     void initHistogram()
@@ -260,6 +260,11 @@ public:
             cout << prefix << "Noise integral: " << noise << endl;
             cout << prefix << "Estimated signal: " << signal << " %err: " << noise / signal << endl;
         }
+    }
+
+    Bool_t hasFit()
+    {
+        return fit != nullptr;
     }
 };
 

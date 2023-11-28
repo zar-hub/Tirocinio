@@ -1,6 +1,6 @@
 #define analisi_cxx
 #include "src/global.h"
-#include "src/conditions.h"
+#include "src/filters.h"
 #include "src/fitFunctions.h"
 #include "src/SmartGraph.h"
 #include "src/BinaryFilter.h"
@@ -10,15 +10,26 @@
 #include <TH2.h>
 #include <TSystem.h>
 #include <TF1.h>
+#include <fstream>
 
 void analisi::Loop()
 {
+    // load data into the filters
+    filters::loadData(this);
 
     // create canvas and SmartGraphs
     auto canvas = new TCanvas("mycanvas", "mycanvas", 0, 0, 1600, 1000);
-    canvas->Divide(2, 2);
-    auto grBarrel = new BinaryFilter("barrel", rettaBigausPrototype, expBigausPrototype, canvas->GetPad(1), canvas->GetPad(2));
-    auto grEndcaps = new BinaryFilter("endcaps", rettaBigausPrototype, expBigausPrototype, canvas->GetPad(3), canvas->GetPad(4));
+    FilterTree unfiltered("");
+
+    unfiltered.root->require("tagPassed", filters::isTagGood, "g");
+    auto ptBin0 = unfiltered.root->left->require("ptBin3", filters::isPtBin3, "g");
+    ptBin0->branch("barrel", "endcaps", filters::isBarrel, filters::isEndcaps, "g");
+    ptBin0->left->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
+    ptBin0->right->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
+
+    // generate pads for ptBin0
+    ptBin0->setPad(canvas);
+
 
     // style
     setGlobalStyle();
@@ -38,32 +49,22 @@ void analisi::Loop()
         nb = fChain->GetEntry(jentry);
         nbytes += nb;
 
-        // fill the graphs
-        if (!GoodWP80(0))
-            continue;
-
-        // do statistic with the second
-        if (GoodWP80(1))
-        {
-            if (eta[1] <= 1.4442)
-                grBarrel->passed->Fill(mee);
-            else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
-                grEndcaps->passed->Fill(mee);
-        }
-        else
-        {
-            if (eta[1] <= 1.4442)
-                grBarrel->failed->Fill(mee);
-            else if ((abs(eta[1]) >= 1.566) && (abs(eta[1]) <= 2.5))
-                grEndcaps->failed->Fill(mee);
-        }
+        unfiltered.root->Fill(mee);
     }
 
-    // Draw the graphs
-    grBarrel->FitAndDraw();
-    grEndcaps->FitAndDraw();
-
+    ptBin0->FitAndDraw();
     printHeader("Fit results");
-    grBarrel->printInfo();
-    grEndcaps->printInfo();
+    unfiltered.printTree(ptBin0);
+
+    // export results
+    ofstream file;
+    file.open("ptBin3.md");
+    file << "```" << endl;
+    file << "ptBin3 results" << endl;
+    unfiltered.printToFile(ptBin0, file);
+    file << "```" << endl;
+    file.close();
+    
+    // save canvas
+    canvas->SaveAs("ptBin3.png");
 }

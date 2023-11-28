@@ -31,7 +31,7 @@ namespace filters
    // < namespace was initialized />
    Bool_t filtersInitialized = kFALSE;
 
-   void loadData(analisi* obj)
+   void loadData(analisi *obj)
    {
       filtersInitialized = kTRUE;
 
@@ -144,8 +144,23 @@ namespace filters
       return kTRUE;
    }
 
-   Bool_t isPositive(){
+   Bool_t isPositive()
+   {
       if ((*charge)[1] > 0)
+         return kTRUE;
+      return kFALSE;
+   }
+
+   Bool_t isPtBin0()
+   {
+      if ((*pt)[1] < 25)
+         return kTRUE;
+      return kFALSE;
+   }
+   
+   Bool_t isPtBin3()
+   {
+      if ((*pt)[1] > 41)
          return kTRUE;
       return kFALSE;
    }

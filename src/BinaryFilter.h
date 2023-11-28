@@ -4,6 +4,7 @@
 #include "global.h"
 #include "SmartGraph.h"
 #include <TString.h>
+#include <fstream>
 
 class FilterNode
 {
@@ -22,6 +23,10 @@ class FilterNode
     TVirtualPad *pad = nullptr;
     Bool_t (*leftFilter)() = nullptr;
     Bool_t (*rightFilter)() = nullptr;
+
+    // results
+    Double_t efficiency;
+    Double_t efficiencyError;
 
 public:
     // children
@@ -309,6 +314,14 @@ public:
             if (right != nullptr)
             {
                 right->FitAndDraw();
+
+                if (childrenHaveFits())
+                {
+                    Double_t areaLeft = left->graph->getSignalIntegral();
+                    Double_t areaRight = right->graph->getSignalIntegral();
+                    efficiency = areaLeft / (areaLeft + areaRight);
+                    efficiencyError = sqrt(efficiency * (1 - efficiency) / (areaLeft + areaRight));
+                }
             }
         }
     }
@@ -320,20 +333,40 @@ public:
     Bool_t hasRight() { return right != nullptr; }
     Bool_t hasLeftFilter() { return leftFilter != nullptr; }
     Bool_t hasRightFilter() { return rightFilter != nullptr; }
+    Bool_t hasBothCildren() { return hasLeft() && hasRight(); }
+    Bool_t childrenHaveGraphs() { return hasBothCildren() && left->hasGraph() && right->hasGraph(); }
+    Bool_t childrenHaveFits() { return childrenHaveGraphs() && left->graph->hasFit() && right->graph->hasFit(); }
+
     const TVirtualPad *getPad() { return pad; }
 
     // print
-    void Print(const string &prefix = ""){
+    void Print(const string &prefix = "")
+    {
         if (hasGraph())
-            {
-                std::cout << prefix << " graph: " << graph->getName() << endl;
-                graph->printInfo(prefix + "    ");
-            }
-            if (shouldDraw)
-            {
-                std::cout << prefix << " pad: " << pad->GetName() << endl;
-            }
-    
+        {
+            std::cout << prefix << " graph: " << graph->getName() << endl;
+            graph->printInfo(prefix + "    ");
+        }
+        // if (shouldDraw)
+        // {
+        //     std::cout << prefix << " pad: " << pad->GetName() << endl;
+        // }
+        if (childrenHaveFits())
+        {
+            std::cout << prefix << " efficiency: " << efficiency << "\u00b1" << efficiencyError << endl;
+        }
+    }
+    void printToFile(ofstream &file, const string &prefix = "")
+    {
+        if (hasGraph())
+        {
+            file << prefix << " graph: " << graph->getName() << endl;
+            file << prefix << "    " << "Entries: " << graph->getEntries() << endl;
+        }
+        if (childrenHaveFits())
+        {
+            file << prefix << " efficiency: " << efficiency << "\u00b1" << efficiencyError << endl;
+        }
     }
 };
 
@@ -357,7 +390,7 @@ public:
         }
     }
 
-    void printTree(FilterNode *node, const std::string &prefix = "", bool isLeft = false)
+    void printTree(FilterNode *node , const std::string &prefix = "", bool isLeft = false)
     {
 
         if (node != nullptr)
@@ -365,7 +398,6 @@ public:
             std::cout << prefix;
             std::cout << (isLeft ? "├───" : "└───");
 
-            
             std::cout << "<" << node->name << ">" << endl;
 
             // blank line
@@ -393,6 +425,45 @@ public:
             if (node->left == nullptr && node->right != nullptr)
             {
                 printTree(node->right, prefix + "    ", false);
+            }
+        }
+    }
+
+    void printToFile(FilterNode *node,  ofstream &file, const std::string &prefix = "", bool isLeft = false)
+    {
+
+        if (node != nullptr)
+        {
+            file << prefix;
+            file << (isLeft ? "├───" : "└───");
+
+            file << "<" << node->name << ">" << endl;
+
+            // blank line
+            if (node->left == nullptr && node->right == nullptr)
+            {
+                node->printToFile(file, prefix + (isLeft ? "│   " : "    "));
+                file << prefix + (isLeft ? "│   " : "    ") << endl;
+            }
+            else
+            {
+                node->printToFile(file, prefix + (isLeft ? "│   │" : "    │"));
+                file << prefix + (isLeft ? "│   |" : "    │") << endl;
+            }
+
+            // enter the next tree level - left and right branch
+            if (node->left != nullptr && node->right != nullptr)
+            {
+                printToFile(node->left, file, prefix + (isLeft ? "│   " : "    "), true);
+                printToFile(node->right, file, prefix + (isLeft ? "│   " : "    "), false);
+            }
+            if (node->left != nullptr && node->right == nullptr)
+            {
+                printToFile(node->left, file, prefix + "    ", false);
+            }
+            if (node->left == nullptr && node->right != nullptr)
+            {
+                printToFile(node->right, file, prefix + "    ", false);
             }
         }
     }
