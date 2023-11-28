@@ -103,13 +103,13 @@ Double_t expBigausV0(Double_t *_x, Double_t *_par)
     Double_t k = _par[2];
     // bigaus
     Double_t bigausMu = _par[3];
-    Double_t bigausA = _par[4];
-    Double_t bigausSigL = _par[5];
-    Double_t bigausSigR = _par[6];
+    Double_t bigausAmplitude = _par[4];
+    Double_t bigausSigLeft = _par[5];
+    Double_t bigausSigRight = _par[6];
 
     // split the parameters
     Double_t parExp[3] = {x0, A, k};
-    Double_t parBigaus[4] = {bigausA, bigausMu, bigausSigL, bigausSigR};
+    Double_t parBigaus[4] = {bigausAmplitude, bigausMu, bigausSigLeft, bigausSigRight};
 
     return bigaus(_x, parBigaus) + exponentialFit(_x, parExp);
 }
@@ -122,10 +122,67 @@ Double_t biExpFit(Double_t *_x, Double_t *_par)
     Double_t kL = _par[2];
     Double_t kR = _par[3];
 
-    if(x<x0)
+    if (x < x0)
         return A * exp(kL * (x - x0));
     else
         return A * exp(-kR * (x - x0));
 }
+
+// encapsulation
+class FitPrototype
+{
+    int parametersNumber;
+    string signalAmplitude;
+    string noiseAmplitude;
+
+    Double_t minx, maxx;
+    vector<string> names;
+    vector<Double_t> parameters;
+    Double_t (*fitFunc)(Double_t *_x, Double_t *_par);
+
+public:
+    FitPrototype(const vector<string> &_names, const vector<Double_t> &_default_parameters,
+                 Double_t (*_fitFunc)(Double_t *_x, Double_t *_par),
+                 string signalAmplitude, string signalNoise, Double_t _minx, Double_t _maxx)
+        : signalAmplitude(signalAmplitude), noiseAmplitude(signalNoise)
+    {
+        if (_names.size() != _default_parameters.size())
+        {
+            std::cout << "Error: protorype names and values do not match in size" << std::endl;
+        }
+
+        auto it = std::find(_names.begin(), _names.end(), signalAmplitude);
+        if (it == _names.end())
+        {
+            std::cout << "Error: amplitude not found in prototype names" << std::endl;
+        }
+
+        parametersNumber = _names.size();
+        names = _names;
+        parameters = _default_parameters;
+        fitFunc = _fitFunc;
+        minx = _minx;
+        maxx = _maxx;
+    }
+
+    TF1 *getWithName(const char *name)
+    {
+        auto fit = new TF1(name, fitFunc, minx, maxx, parametersNumber);
+        for (int i = 0; i < parametersNumber; i++)
+        {
+            fit->SetParName(i, names[i].c_str());
+            fit->SetParameter(i, parameters[i]);
+        }
+        return fit;
+    }
+
+    TF1 *getNoise(const TF1 *fit)
+    {
+        // copy the fit object
+        auto noise = new TF1(*fit);
+        noise->SetParameter(signalAmplitude.c_str(), 0);
+        return noise;
+    }
+};
 
 #endif // FITFUNCTIONS_H

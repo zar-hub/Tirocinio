@@ -1,0 +1,31 @@
+Fit results
+└───<PtBin3>
+    │ graph: PtBin3
+    │    Entries: 3426
+    │
+    ├───<PtBin3Barrel>
+    │   │ graph: PtBin3Barrel
+    │   │    Entries: 2596
+    │   │ efficiency: 0.738905±0.00919872
+    │   |
+    │   ├───<PtBin3BarrelProbePassed>
+    │   │    graph: PtBin3BarrelProbePass
+    │   │       Entries: 1813
+    │   │   
+    │   └───<PtBin3BarrelProbeFailed>
+    │        graph: PtBin3BarrelProbeFail
+    │           Entries: 783
+    │       
+    └───<PtBin3Endcaps>
+        │ graph: PtBin3Endcaps
+        │    Entries: 782
+        │ efficiency: 0.685581±0.0187932
+        │
+        ├───<PtBin3EndcapsProbePassed>
+        │    graph: PtBin3EndcapsProbePass
+        │       Entries: 495
+        │   
+        └───<PtBin3EndcapsProbeFailed>
+             graph: PtBin3EndcapsProbeFail
+                Entries: 287
+            
