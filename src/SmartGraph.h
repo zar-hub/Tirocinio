@@ -13,7 +13,6 @@ class SmartGraph
     // tools and data
     string name;
     TH1D *histo;
-    TF1 *fit = nullptr;
     TF1 *noiseFit = nullptr;
     FitPrototype *prototype = nullptr;
     TVirtualPad *pad = nullptr;
@@ -33,6 +32,7 @@ class SmartGraph
     }
 
 public:
+    TF1 *fit = nullptr;
     SmartGraph(const string &name) : name(name)
     {
         initHistogram();

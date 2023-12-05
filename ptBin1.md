@@ -1,5 +1,5 @@
 ```
-ptBin3results
+ptBin1results
 └───<>
     │ graph: 
     │    Entries: 4803

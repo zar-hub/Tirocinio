@@ -119,6 +119,8 @@ vector<string> expBigausNames = {"exp x0", "exp amplitude", "exp k", "normal mea
 vector<Double_t> expBigausDefParam = {36, 305, 0.02, 90, 590, 5, 4};
 FitPrototype expBigausPrototype(expBigausNames, expBigausDefParam, expBigausV0, "normal amplitude", "exp amplitude", fitMinX, fitMaxX);
 
-identCout icout;
+vector<string> bigausNames = {"amplitude", "mean", "sigma left", "sigma right"};
+vector<Double_t> bigausDefParam = {235,91,2.3,3};
+FitPrototype bigausPrototype(bigausNames, bigausDefParam, bigaus, "amplitude", "", fitMinX, fitMaxX);
 
 #endif // __GLOBAL_H__

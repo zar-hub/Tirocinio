@@ -92,9 +92,15 @@ void analisi::Loop()
 
 
 # Some data
-
+## Initial analysis
 ![graph](canvas.png)
-
+All the events, filtered for probe in barrel/endcaps. 
+## PT < 25 [see the data](ptBin0.md)
+![ptBin0](ptBin0.png)
+## 25 < PT < 33  [see the data](ptBin1.md)
+![ptBin1](ptBin1.png)
+## 33 < PT < 41 [see the data](ptBin2.md)
+![ptBin2](ptBin2.png)
 ## PT > 41 [see the data](ptBin3.md)
 ![ptBin3](ptBin3.png)
 

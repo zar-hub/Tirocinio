@@ -73,7 +73,10 @@
 			"streambuf": "cpp",
 			"thread": "cpp",
 			"cinttypes": "cpp",
-			"typeinfo": "cpp"
+			"typeinfo": "cpp",
+			"filterTuning.C": "cpp",
+			"analisi copy.C": "cpp",
+			"ptAnalisi.C": "cpp"
 		},
 		"C_Cpp.default.includePath": [
 			"/opt/root/include"

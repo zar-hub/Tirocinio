@@ -62,7 +62,7 @@ namespace filters
          return kFALSE;
       if (!debugMessageWP80("dist or dcot failed...", abs((*dist)[i]) > 0.02 || abs((*dcot)[i]) > 0.02))
          return kFALSE;
-      if (abs((*eta)[i]) <= 1.4442)
+      if (abs((*eta)[i]) <= 1.44)
       {
          if (!debugMessageWP80("barrel", true))
             return kFALSE;
@@ -85,7 +85,7 @@ namespace filters
          if (!debugMessageWP80("GOOD!", true))
             return kFALSE;
       }
-      else if (abs((*eta)[i]) >= 1.566 && (abs((*eta)[i]) <= 2.5))
+      else if (abs((*eta)[i]) >= 1.55 && (abs((*eta)[i]) <= 2.5))
       {
          if (!debugMessageWP80("endcaps", true))
             return kFALSE;
@@ -119,15 +119,32 @@ namespace filters
    // < Particle 1 cuts />
    Bool_t isBarrel()
    {
-      if (abs((*eta)[1]) <= 1.4442)
+      if (abs((*eta)[1]) <= 1.44)
+         return kTRUE;
+      return kFALSE;
+   }
+
+   Bool_t isTagBarrel()
+   {
+      if (abs((*eta)[0]) <= 1.44)
          return kTRUE;
       return kFALSE;
    }
 
    Bool_t isEndcaps()
    {
-      if (abs((*eta)[1]) >= 1.566 && (abs((*eta)[1]) <= 2.5))
+      if (abs((*eta)[1]) >= 1.55 && (abs((*eta)[1]) <= 2.5))
          return kTRUE;
+      return kFALSE;
+   }
+   Bool_t isTagEndcaps()
+   {
+
+      if (abs((*eta)[0]) >= 1.55 && (abs((*eta)[0]) <= 2.5))
+      {
+
+         return kTRUE;
+      }
       return kFALSE;
    }
    Bool_t isProbeGood()
@@ -157,10 +174,24 @@ namespace filters
          return kTRUE;
       return kFALSE;
    }
-   
+
+   Bool_t isPtBin1()
+   {
+      if ((*pt)[1] >= 25 && (*pt)[1] < 33)
+         return kTRUE;
+      return kFALSE;
+   }
+
+   Bool_t isPtBin2()
+   {
+      if ((*pt)[1] >= 33 && (*pt)[1] < 41)
+         return kTRUE;
+      return kFALSE;
+   }
+
    Bool_t isPtBin3()
    {
-      if ((*pt)[1] > 41)
+      if ((*pt)[1] >= 41)
          return kTRUE;
       return kFALSE;
    }
