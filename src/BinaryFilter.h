@@ -322,6 +322,13 @@ public:
                     efficiency = areaLeft / (areaLeft + areaRight);
                     efficiencyError = sqrt(efficiency * (1 - efficiency) / (areaLeft + areaRight));
                 }
+                else if (childrenHaveGraphs())
+                {
+                    Double_t areaLeft = left->graph->getEntries();
+                    Double_t areaRight = right->graph->getEntries();
+                    efficiency = areaLeft / (areaLeft + areaRight);
+                    efficiencyError = sqrt(efficiency * (1 - efficiency) / (areaLeft + areaRight));
+                }
             }
         }
     }
@@ -355,13 +362,18 @@ public:
         {
             std::cout << prefix << " efficiency: " << efficiency << "\u00b1" << efficiencyError << endl;
         }
+        else if (childrenHaveGraphs())
+        {
+            std::cout << prefix << " efficiency: " << efficiency << "\u00b1" << efficiencyError << endl;
+        }
     }
     void printToFile(ofstream &file, const string &prefix = "")
     {
         if (hasGraph())
         {
             file << prefix << " graph: " << graph->getName() << endl;
-            file << prefix << "    " << "Entries: " << graph->getEntries() << endl;
+            file << prefix << "    "
+                 << "Entries: " << graph->getEntries() << endl;
         }
         if (childrenHaveFits())
         {
@@ -390,7 +402,7 @@ public:
         }
     }
 
-    void printTree(FilterNode *node , const std::string &prefix = "", bool isLeft = false)
+    void printTree(FilterNode *node, const std::string &prefix = "", bool isLeft = false)
     {
 
         if (node != nullptr)
@@ -429,7 +441,7 @@ public:
         }
     }
 
-    void printToFile(FilterNode *node,  ofstream &file, const std::string &prefix = "", bool isLeft = false)
+    void printToFile(FilterNode *node, ofstream &file, const std::string &prefix = "", bool isLeft = false)
     {
 
         if (node != nullptr)
