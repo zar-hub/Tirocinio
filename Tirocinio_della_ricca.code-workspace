@@ -76,7 +76,9 @@
 			"typeinfo": "cpp",
 			"filterTuning.C": "cpp",
 			"analisi copy.C": "cpp",
-			"ptAnalisi.C": "cpp"
+			"ptAnalisi.C": "cpp",
+			"FinalGraph.C": "cpp",
+			"ptAnalisiSave.C": "cpp"
 		},
 		"C_Cpp.default.includePath": [
 			"/opt/root/include"

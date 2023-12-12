@@ -1,33 +1,33 @@
 ```
-ptBin1results
+ptBin1 results
 └───<>
     │ graph: 
-    │    Entries: 4803
+    │    Entries: 62946
     │
     ├───<Barrel>
     │   │ graph: Barrel
-    │   │    Entries: 3377
-    │   │ efficiency: 0.67178±0.0162476
+    │   │    Entries: 42473
+    │   │ efficiency: 0.806106±0.00210517
     │   |
     │   ├───<BarrelProbePassed>
     │   │    graph: BarrelProbePass
-    │   │       Entries: 735
+    │   │       Entries: 34299
     │   │   
     │   └───<BarrelProbeFailed>
     │        graph: BarrelProbeFail
-    │           Entries: 2642
+    │           Entries: 8174
     │       
     └───<Endcaps>
         │ graph: Endcaps
-        │    Entries: 1317
-        │ efficiency: 0.589212±0.0211632
+        │    Entries: 19219
+        │ efficiency: 0.703795±0.00355746
         │
         ├───<EndcapsProbePassed>
         │    graph: EndcapsProbePass
-        │       Entries: 406
+        │       Entries: 13643
         │   
         └───<EndcapsProbeFailed>
              graph: EndcapsProbeFail
-                Entries: 911
+                Entries: 5576
             
 ```

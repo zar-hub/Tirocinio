@@ -31,7 +31,7 @@ void analisi::Loop()
     ptBin0->left->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
     ptBin0->right->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
 
-    ptBin0->left->right->graph->setParameters(57, 122, 0.04, 90, 15, 4, 4);
+    ptBin0->left->right->graph->setParameters(0, 1322, 0.04, 84.65, 18.32, 1.6, 7.67);
 
     // create the first filter tree for ptBin1
     FilterTree pt1Tree("");
@@ -42,7 +42,7 @@ void analisi::Loop()
     ptBin1->right->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
 
     ptBin1->left->left->graph->setParameters(120, -0.18, 93, 180, -3, -3);
-    ptBin1->right->right->graph->setParameters(20, 11, 0.01, 90, 14, 8, 4);
+    ptBin1->right->right->graph->setParameters(0, 22, 0.12, 90, 24, 8, 2.7);
 
     // create the first filter tree for ptBin2
     FilterTree pt2Tree("");
@@ -52,6 +52,8 @@ void analisi::Loop()
     ptBin2->left->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
     ptBin2->right->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
 
+    ptBin2->right->right->graph->setParameters(0, 3.2, 0.008, 85, 24.3, 0.7, 5.5);
+
     // create the first filter tree for ptBin3
     FilterTree pt3Tree("");
     pt3Tree.root->require("", filters::isTagGood, "g");
@@ -59,7 +61,7 @@ void analisi::Loop()
     ptBin3->branch("barrel", "endcaps", filters::isBarrel, filters::isEndcaps, "g");
     ptBin3->left->branch("probe", filters::isProbeGood, bigausPrototype, expBigausPrototype, "gd");
     ptBin3->right->branch("probe", filters::isProbeGood, bigausPrototype, expBigausPrototype, "gd");
-    
+
     // set canvases
     ptBin0->setPad(canvas0);
     ptBin1->setPad(canvas1);
@@ -109,15 +111,33 @@ void analisi::Loop()
     // export results
     ofstream file;
 
-    for (int i = 0; i < 4; i++)
-    {
-        file.open("ptBin" + to_string(i) + ".md");
-        file << "```" << endl;
-        file << "ptBin" + to_string(i) + "results" << endl;
-        pt0Tree.printToFile(ptBin0, file);
-        file << "```" << endl;
-        file.close();
-    }
+    file.open("ptBin0.md");
+    file << "```" << endl;
+    file << "ptBin0 results" << endl;
+    pt0Tree.printToFile(ptBin0, file);
+    file << "```" << endl;
+    file.close();
+
+    file.open("ptBin1.md");
+    file << "```" << endl;
+    file << "ptBin1 results" << endl;
+    pt1Tree.printToFile(ptBin1, file);
+    file << "```" << endl;
+    file.close();
+
+    file.open("ptBin2.md");
+    file << "```" << endl;
+    file << "ptBin2 results" << endl;
+    pt2Tree.printToFile(ptBin2, file);
+    file << "```" << endl;
+    file.close();
+
+    file.open("ptBin3.md");
+    file << "```" << endl;
+    file << "ptBin3 results" << endl;
+    pt3Tree.printToFile(ptBin3, file);
+    file << "```" << endl;
+    file.close();
 
     // save canvas
     canvas0->SaveAs("ptBin0.png");

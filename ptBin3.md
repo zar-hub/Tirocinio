@@ -1,33 +1,33 @@
 ```
-ptBin3results
-└───<>
-    │ graph: 
-    │    Entries: 4803
+ptBin3 results
+└───<TagPassedNegative>
+    │ graph: TagPassedNegative
+    │    Entries: 8113
     │
-    ├───<Barrel>
-    │   │ graph: Barrel
-    │   │    Entries: 3377
-    │   │ efficiency: 0.67178±0.0162476
+    ├───<TagPassedNegativeBarrel>
+    │   │ graph: TagPassedNegativeBarrel
+    │   │    Entries: 5796
+    │   │ efficiency: 0.805888±0.00646108
     │   |
-    │   ├───<BarrelProbePassed>
-    │   │    graph: BarrelProbePass
-    │   │       Entries: 735
+    │   ├───<TagPassedNegativeBarrelProbePassed>
+    │   │    graph: TagPassedNegativeBarrelProbePass
+    │   │       Entries: 3398
     │   │   
-    │   └───<BarrelProbeFailed>
-    │        graph: BarrelProbeFail
-    │           Entries: 2642
+    │   └───<TagPassedNegativeBarrelProbeFailed>
+    │        graph: TagPassedNegativeBarrelProbeFail
+    │           Entries: 2398
     │       
-    └───<Endcaps>
-        │ graph: Endcaps
-        │    Entries: 1317
-        │ efficiency: 0.589212±0.0211632
+    └───<TagPassedNegativeEndcaps>
+        │ graph: TagPassedNegativeEndcaps
+        │    Entries: 2170
+        │ efficiency: 0.687595±0.0119904
         │
-        ├───<EndcapsProbePassed>
-        │    graph: EndcapsProbePass
-        │       Entries: 406
+        ├───<TagPassedNegativeEndcapsProbePassed>
+        │    graph: TagPassedNegativeEndcapsProbePass
+        │       Entries: 1186
         │   
-        └───<EndcapsProbeFailed>
-             graph: EndcapsProbeFail
-                Entries: 911
+        └───<TagPassedNegativeEndcapsProbeFailed>
+             graph: TagPassedNegativeEndcapsProbeFail
+                Entries: 984
             
 ```

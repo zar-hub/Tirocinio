@@ -168,6 +168,13 @@ namespace filters
       return kFALSE;
    }
 
+   Bool_t isNegative()
+   {
+      if ((*charge)[1] < 0)
+         return kTRUE;
+      return kFALSE;
+   }
+
    Bool_t isPtBin0()
    {
       if ((*pt)[1] < 25)

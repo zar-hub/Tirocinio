@@ -21,15 +21,14 @@ void analisi::Loop()
     auto canvas = new TCanvas("mycanvas", "mycanvas", 0, 0, 1600, 1000);
     FilterTree unfiltered("");
 
-    string name = "100Bin";
-
     unfiltered.root->require("tagPassed", filters::isTagGood, "g");
-    unfiltered.root->branch("barrel", "endcaps", filters::isBarrel, filters::isEndcaps, "g");
-    unfiltered.root->left->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
-    unfiltered.root->right->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
+    auto ptBin0 = unfiltered.root->left->require("negative", filters::isPositive, "g");
+    ptBin0->branch("barrel", "endcaps", filters::isBarrel, filters::isEndcaps, "g");
+    ptBin0->left->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
+    ptBin0->right->branch("probe", filters::isProbeGood, rettaBigausPrototype, expBigausPrototype, "gd");
 
     // generate pads for ptBin0
-    unfiltered.root->setPad(canvas);
+    ptBin0->setPad(canvas);
 
 
     // style
@@ -53,19 +52,19 @@ void analisi::Loop()
         unfiltered.root->Fill(mee);
     }
 
-    unfiltered.root->FitAndDraw();
+    ptBin0->FitAndDraw();
     printHeader("Fit results");
-    unfiltered.printTree(unfiltered.root);
+    unfiltered.printTree(ptBin0);
 
     // export results
     ofstream file;
-    file.open(name + ".md");
+    file.open("ptBin3.md");
     file << "```" << endl;
-    file << name + " results" << endl;
-    unfiltered.printToFile(unfiltered.root, file);
+    file << "ptBin3 results" << endl;
+    unfiltered.printToFile(ptBin0, file);
     file << "```" << endl;
     file.close();
     
     // save canvas
-    canvas->SaveAs((name + ".png").c_str());
+    canvas->SaveAs("ptBin3.png");
 }

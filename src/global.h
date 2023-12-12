@@ -11,7 +11,7 @@ using namespace std;
 
 // < SETTINGS />
 // positioning and size of graphical elements
-#define grBins 60
+#define grBins 200
 #define grMinX 60
 #define grMaxX 120
 #define fitMinX 60

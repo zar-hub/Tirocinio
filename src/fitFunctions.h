@@ -183,6 +183,14 @@ public:
         noise->SetParameter(signalAmplitude.c_str(), 0);
         return noise;
     }
+
+    TF1 *getSignal(const TF1 *fit)
+    {
+        // copy the fit object
+        auto signal = new TF1(*fit);
+        signal->SetParameter(noiseAmplitude.c_str(), 0);
+        return signal;
+    }
 };
 
 #endif // FITFUNCTIONS_H

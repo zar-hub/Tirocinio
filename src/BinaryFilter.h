@@ -27,6 +27,8 @@ class FilterNode
     // results
     Double_t efficiency;
     Double_t efficiencyError;
+    Double_t efficiencySignal;
+    Double_t efficiencyErrorSignal;
 
 public:
     // children
@@ -317,10 +319,18 @@ public:
 
                 if (childrenHaveFits())
                 {
+                    // fondo
                     Double_t areaLeft = left->graph->getSignalIntegral();
                     Double_t areaRight = right->graph->getSignalIntegral();
                     efficiency = areaLeft / (areaLeft + areaRight);
                     efficiencyError = sqrt(efficiency * (1 - efficiency) / (areaLeft + areaRight));
+
+                    // picco
+                    areaLeft = left->graph->getPeak();
+                    areaRight = right->graph->getPeak();
+                    efficiencySignal = areaLeft / (areaLeft + areaRight);
+                    efficiencyErrorSignal = sqrt(efficiencySignal * (1 - efficiencySignal) / (areaLeft + areaRight));
+
                 }
             }
         }
@@ -353,7 +363,8 @@ public:
         // }
         if (childrenHaveFits())
         {
-            std::cout << prefix << " efficiency: " << efficiency << "\u00b1" << efficiencyError << endl;
+            std::cout << prefix << " efficiencyFondo: " << efficiency << "\u00b1" << efficiencyError << endl;
+            std::cout << prefix << " efficiencyPicco: " << efficiencySignal << "\u00b1" << efficiencyErrorSignal << endl;
         }
     }
     void printToFile(ofstream &file, const string &prefix = "")

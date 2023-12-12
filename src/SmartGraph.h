@@ -21,6 +21,7 @@ class SmartGraph
     Double_t rawSignal=-1;
     Double_t noise=-1;
     Double_t signal=-1;
+    Double_t peak=-1;
 
     // helpers
     void initHistogram()
@@ -163,6 +164,11 @@ public:
         return rawSignal;
     }
 
+    Double_t getPeak()
+    {
+        return peak;
+    }
+
     Double_t getEntries()
     {
         if (histo != nullptr)
@@ -194,6 +200,7 @@ public:
             histo->Fit(fit, "R");
             rawSignal = histo->Integral();
             noise = prototype->getNoise(fit)->Integral(fitMinX, fitMaxX) / histo->GetBinWidth(1);
+            peak = prototype->getSignal(fit)->Integral(fitMinX, fitMaxX) / histo->GetBinWidth(1);
             signal = rawSignal - noise;
         }
     }
