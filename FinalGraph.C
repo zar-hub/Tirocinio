@@ -121,10 +121,6 @@ int FinalGraph()
     gr9->SetMarkerColor(kOrange + 8);
     gr9->SetMarkerStyle(21);
 
-
-
-
-
     // STANDARD
     c2->cd();
     gr0->Draw("AP");
