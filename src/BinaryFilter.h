@@ -330,7 +330,6 @@ public:
                     areaRight = right->graph->getPeak();
                     efficiencySignal = areaLeft / (areaLeft + areaRight);
                     efficiencyErrorSignal = sqrt(efficiencySignal * (1 - efficiencySignal) / (areaLeft + areaRight));
-
                 }
             }
         }
@@ -346,6 +345,12 @@ public:
     Bool_t hasBothCildren() { return hasLeft() && hasRight(); }
     Bool_t childrenHaveGraphs() { return hasBothCildren() && left->hasGraph() && right->hasGraph(); }
     Bool_t childrenHaveFits() { return childrenHaveGraphs() && left->graph->hasFit() && right->graph->hasFit(); }
+
+    // getters
+    Double_t getEfficiency() { return efficiency; }
+    Double_t getEfficiencyError() { return efficiencyError; }
+    Double_t getEfficiencySignal() { return efficiencySignal; }
+    Double_t getEfficiencyErrorSignal() { return efficiencyErrorSignal; }
 
     const TVirtualPad *getPad() { return pad; }
 
@@ -372,7 +377,8 @@ public:
         if (hasGraph())
         {
             file << prefix << " graph: " << graph->getName() << endl;
-            file << prefix << "    " << "Entries: " << graph->getEntries() << endl;
+            file << prefix << "    "
+                 << "Entries: " << graph->getEntries() << endl;
         }
         if (childrenHaveFits())
         {
@@ -401,7 +407,7 @@ public:
         }
     }
 
-    void printTree(FilterNode *node , const std::string &prefix = "", bool isLeft = false)
+    void printTree(FilterNode *node, const std::string &prefix = "", bool isLeft = false)
     {
 
         if (node != nullptr)
@@ -440,7 +446,7 @@ public:
         }
     }
 
-    void printToFile(FilterNode *node,  ofstream &file, const std::string &prefix = "", bool isLeft = false)
+    void printToFile(FilterNode *node, ofstream &file, const std::string &prefix = "", bool isLeft = false)
     {
 
         if (node != nullptr)

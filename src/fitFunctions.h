@@ -3,6 +3,8 @@
 
 #include <TROOT.h>
 #include <TF1.h>
+#include "json.hpp"
+using json = nlohmann::json;
 
 Double_t bigaus(Double_t *_x, Double_t *_par)
 {
@@ -87,28 +89,28 @@ Double_t rettaBigaus(Double_t *_x, Double_t *_par)
 
 Double_t exponentialFit(Double_t *_x, Double_t *_par)
 {
-    Double_t x = _x[0];
-    Double_t x0 = _par[0];
-    Double_t A = _par[1];
-    Double_t k = _par[2];
+    Double_t x = _x[0]; 
+    // Double_t x0 = _par[0]; was redaundant with A
+    Double_t A = _par[0];
+    Double_t k = _par[1];
 
-    return A * exp(-k * (x - x0));
+    return A * exp(-k * x);
 }
 
 Double_t expBigausV0(Double_t *_x, Double_t *_par)
 {
     // exp
-    Double_t x0 = _par[0];
-    Double_t A = _par[1];
-    Double_t k = _par[2];
+    // Double_t x0 = _par[0]; was redaundant with A
+    Double_t A = _par[0];
+    Double_t k = _par[1];
     // bigaus
-    Double_t bigausMu = _par[3];
-    Double_t bigausAmplitude = _par[4];
-    Double_t bigausSigLeft = _par[5];
-    Double_t bigausSigRight = _par[6];
+    Double_t bigausMu = _par[2];
+    Double_t bigausAmplitude = _par[3];
+    Double_t bigausSigLeft = _par[4];
+    Double_t bigausSigRight = _par[5];
 
     // split the parameters
-    Double_t parExp[3] = {x0, A, k};
+    Double_t parExp[2] = {A, k};
     Double_t parBigaus[4] = {bigausAmplitude, bigausMu, bigausSigLeft, bigausSigRight};
 
     return bigaus(_x, parBigaus) + exponentialFit(_x, parExp);
@@ -134,6 +136,7 @@ class FitPrototype
     int parametersNumber;
     string signalAmplitude;
     string noiseAmplitude;
+    string protoName;
 
     Double_t minx, maxx;
     vector<string> names;
@@ -141,10 +144,10 @@ class FitPrototype
     Double_t (*fitFunc)(Double_t *_x, Double_t *_par);
 
 public:
-    FitPrototype(const vector<string> &_names, const vector<Double_t> &_default_parameters,
+    FitPrototype(const string protoName, const vector<string> &_names, const vector<Double_t> &_default_parameters,
                  Double_t (*_fitFunc)(Double_t *_x, Double_t *_par),
                  string signalAmplitude, string signalNoise, Double_t _minx, Double_t _maxx)
-        : signalAmplitude(signalAmplitude), noiseAmplitude(signalNoise)
+        : protoName(protoName), signalAmplitude(signalAmplitude), noiseAmplitude(signalNoise)
     {
         if (_names.size() != _default_parameters.size())
         {
@@ -191,6 +194,13 @@ public:
         signal->SetParameter(noiseAmplitude.c_str(), 0);
         return signal;
     }
+
+    const string &getName() const
+    {
+        return protoName;
+    }
 };
+
+
 
 #endif // FITFUNCTIONS_H

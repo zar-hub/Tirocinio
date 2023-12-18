@@ -11,7 +11,7 @@ using namespace std;
 
 // < SETTINGS />
 // positioning and size of graphical elements
-#define grBins 200
+int grBins = 100;
 #define grMinX 60
 #define grMaxX 120
 #define fitMinX 60
@@ -40,7 +40,7 @@ class identCout
       string s = "";
       for (int i = 0; i < n; i++)
       {
-            s += ident_string;
+         s += ident_string;
       }
       return s;
    }
@@ -111,16 +111,32 @@ void setGlobalStyle()
 }
 
 // < FIT PROTOTYPES />
-vector<string> rettaBigausNames = {"line y-intercept", "line angular coeff.", "normal mean", "normal amplitude", "sigma left", "sigma right"};
+vector<string> rettaBigausNames = {"line y-intercept",
+                                   "line angular coeff.",
+                                   "normal mean",
+                                   "normal amplitude",
+                                   "sigma left",
+                                   "sigma right"};
 vector<Double_t> rettaBigausDefParam = {0, -0.02, 90, 1000, 1, 1};
-FitPrototype rettaBigausPrototype(rettaBigausNames, rettaBigausDefParam, rettaBigaus, "normal amplitude", "line angular coeff.", fitMinX, fitMaxX);
+FitPrototype rettaBigausPrototype("rettaBigaus", rettaBigausNames, rettaBigausDefParam, rettaBigaus,
+                                  "normal amplitude", "line angular coeff.", fitMinX, fitMaxX);
 
-vector<string> expBigausNames = {"exp x0", "exp amplitude", "exp k", "normal mean", "normal amplitude", "sigma left", "sigma right"};
-vector<Double_t> expBigausDefParam = {36, 305, 0.02, 90, 590, 5, 4};
-FitPrototype expBigausPrototype(expBigausNames, expBigausDefParam, expBigausV0, "normal amplitude", "exp amplitude", fitMinX, fitMaxX);
+vector<string> expBigausNames = {"exp amplitude",
+                                 "exp k",
+                                 "normal mean",
+                                 "normal amplitude",
+                                 "sigma left",
+                                 "sigma right"};
+vector<Double_t> expBigausDefParam = {305, 0.02, 90, 590, 5, 4};
+FitPrototype expBigausPrototype("expBigaus", expBigausNames, expBigausDefParam, expBigausV0,
+                                "normal amplitude", "exp amplitude", fitMinX, fitMaxX);
 
-vector<string> bigausNames = {"amplitude", "mean", "sigma left", "sigma right"};
-vector<Double_t> bigausDefParam = {235,91,2.3,3};
-FitPrototype bigausPrototype(bigausNames, bigausDefParam, bigaus, "amplitude", "", fitMinX, fitMaxX);
+vector<string> bigausNames = {"amplitude",
+                              "mean",
+                              "sigma left",
+                              "sigma right"};
+vector<Double_t> bigausDefParam = {235, 91, 2.3, 3};
+FitPrototype bigausPrototype("bigaus", bigausNames, bigausDefParam, bigaus,
+                             "amplitude", "", fitMinX, fitMaxX);
 
 #endif // __GLOBAL_H__

@@ -78,10 +78,13 @@
 			"analisi copy.C": "cpp",
 			"ptAnalisi.C": "cpp",
 			"FinalGraph.C": "cpp",
-			"ptAnalisiSave.C": "cpp"
+			"ptAnalisiSave.C": "cpp",
+			"GenDataTable.C": "cpp",
+			"BinaryFilter.C": "cpp"
 		},
 		"C_Cpp.default.includePath": [
 			"/opt/root/include"
-		]
+		],
+		"editor.rulers": [80,120]
 	}
 }

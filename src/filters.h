@@ -202,6 +202,32 @@ namespace filters
          return kTRUE;
       return kFALSE;
    }
-}
 
+   // < Utils />
+   const char *parseFilter(Bool_t(filter)())
+   {
+      if (filter == filters::isTagGood)
+         return "default";
+      else if (filter == filters::isBarrel)
+         return "isBarrel";
+      else if (filter == filters::isEndcaps)
+         return "isEndcaps";
+      else if (filter == filters::isProbeGood)
+         return "isProbeGood";
+      else if (filter == filters::isPositive)
+         return "isPositive";
+      else if (filter == filters::isNegative)
+         return "isNegative";
+      else if (filter == filters::isPtBin0)
+         return "isPtBin0";
+      else if (filter == filters::isPtBin1)
+         return "isPtBin1";
+      else if (filter == filters::isPtBin2)
+         return "isPtBin2";
+      else if (filter == filters::isPtBin3)
+         return "isPtBin3";
+      else
+         return "unknown";
+   }
+}
 #endif // FILTERS_H

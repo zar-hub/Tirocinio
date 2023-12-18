@@ -7,6 +7,7 @@
 #include <TF1.h>
 #include <TCanvas.h>
 #include <TPad.h>
+#include <TFitResult.h>
 
 class SmartGraph
 {
@@ -18,10 +19,10 @@ class SmartGraph
     TVirtualPad *pad = nullptr;
 
     // results
-    Double_t rawSignal=-1;
-    Double_t noise=-1;
-    Double_t signal=-1;
-    Double_t peak=-1;
+    Double_t rawSignal = -1;
+    Double_t noise = -1;
+    Double_t signal = -1;
+    Double_t peak = -1;
 
     // helpers
     void initHistogram()
@@ -193,11 +194,17 @@ public:
 
     // <  Fit related members/>
 
+    #include <TFitResult.h>
+
     void Fit()
     {
         if (histo != nullptr && fit != nullptr)
         {
-            histo->Fit(fit, "R");
+            TFitResultPtr fitRes = histo->Fit(fit, "QSR");
+            if (fitRes->Status() != 0)
+            {
+                std::cout << "Fit " << name << " did not converge" << std::endl;
+            }
             rawSignal = histo->Integral();
             noise = prototype->getNoise(fit)->Integral(fitMinX, fitMaxX) / histo->GetBinWidth(1);
             peak = prototype->getSignal(fit)->Integral(fitMinX, fitMaxX) / histo->GetBinWidth(1);
@@ -248,6 +255,7 @@ public:
         // because the noise is calculated from the fit
         this->Draw();
         this->Fit();
+
         this->drawNoise("same");
     }
 
